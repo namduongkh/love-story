@@ -1,0 +1,14 @@
+{
+  "name": "love-story",
+  "version": "1.0.0",
+  "description": "Truyện ngôn tình",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phong Nguyễn",
+  "license": "ISC",
+  "dependencies": {
+    "hapi": "^16.5.2"
+  }
+}
