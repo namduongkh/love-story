@@ -1,0 +1,85 @@
+<section data-ng-controller="CategoriesController" data-ng-init="find()">
+    <section class="content-header">
+        <h1>Categories</h1>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">List Categories</h3>
+                        <div class="pull-right">
+                            <a class="btn btn-block btn-primary" data-ui-sref="createCategory">New</a>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <notice-dir/>
+                        <div class="box-tools">
+                            <div class="input-group" style="width: 150px;">
+                                <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search"
+                                />
+                                <div class="input-group-btn">
+                                    <button ng-click="filter()" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class="pull-left">
+                            <p>Total items: {{totalItems}}</p>
+                            <p>Total page: {{totalPage}}</p>
+                            <p>Total showing items: {{categories.length}}</p>
+                        </div>
+                        <div>&nbsp;</div>
+                        <table id="table-list" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Community</th>
+                                    <!-- <th>Identity</th> -->
+                                    <th>Type</th>
+                                    <th>Created on</th>
+                                    <!-- <th>Created by</th> -->
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="category in categories">
+                                    <td><a data-ui-sref="editCategory({categoryId: category._id})">{{category._id}}</a></td>
+                                    <td>{{category.name}}</td>
+                                    <td>{{category.communityId.title}}</td>
+                                    <!-- <td>{{category.identity}}</td> -->
+                                    <td>{{category.type}}</td>
+                                    <td>{{category.created | date:'medium'}}</td>
+                                    <!-- <td>{{category.user.displayName}}</td> -->
+                                    <td>
+                                        <a data-ui-sref="editCategory({categoryId: category._id})" title="Edit"><i class="glyphicon glyphicon-edit"></i></a>                                        &nbsp; &nbsp;
+                                        <a ng-click="remove(category._id)" title="Delete">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- <ul boundary-links="true" items-per-page="itemsPerPage" max-size="numberVisiblePages" uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm pull-right" previous-text="&lsaquo;" next-text="&rsaquo;"
+                            first-text="&laquo;" last-text="&raquo;"></ul> -->
+                        <bd-pagination max-page="10" name="category_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged"
+                        />
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="alert alert-warning text-center" data-ng-hide="!categories.$resolved || categories.length">
+                    No Categories yet, why don't you <a data-ui-sref="createCategory">create one</a>?
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

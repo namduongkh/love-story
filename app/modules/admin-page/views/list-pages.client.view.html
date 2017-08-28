@@ -1,0 +1,80 @@
+<section data-ng-controller="PagesController" data-ng-init="find()">
+    <section class="content-header">
+        <h1>Pages</h1>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">List Pages</h3>
+                        <div class="pull-right">
+                            <a class="btn btn-block btn-primary" data-ui-sref="createPage">New</a>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <notice-dir/>
+                        <div class="box-tools">
+                            <div class="input-group" style="width: 150px;">
+                                <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search" />
+                                <div class="input-group-btn">
+                                    <button ng-click="filter()" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class="pull-left">
+                            <p>Total items: {{totalItems}}</p>
+                            <p>Total page: {{totalPage}}</p>
+                            <p>Total showing items: {{pages.length}}</p>
+                        </div>
+                        <div>&nbsp;</div>
+                        <table id="table-list" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Created on</th>
+                                    <th>Identity</th>
+                                    <!-- <th>Created by</th> -->
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="page in pages">
+                                    <td><a data-ui-sref="editPage({pageId: page._id})">{{page._id}}</a></td>
+                                    <td>{{page.title}}</td>
+                                    <td>{{page.created | date:'medium'}}</td>
+                                    <td>{{page.identity}}</td>
+                                    <!-- <td>{{page.user.name}}</td> -->
+                                    <td>
+                                        <a data-ui-sref="editPage({pageId: page._id})" title="Edit"><i class="glyphicon glyphicon-edit"></i></a> &nbsp; &nbsp;
+                                        <a ng-click="remove(page._id)" title="Delete">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <!-- <ul boundary-links="true" items-per-page="itemsPerPage" max-size="numberVisiblePages" uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm pull-right" previous-text="&lsaquo;" next-text="&rsaquo;"
+                            first-text="&laquo;" last-text="&raquo;" ng-disabled="blocked"></ul> -->
+                        <bd-pagination max-page="10" name="page_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged" />
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="alert alert-warning text-center" data-ng-hide="!pages.$resolved || pages.length">
+                    No Pages yet, why don't you <a data-ui-sref="createPage">create one</a>?
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

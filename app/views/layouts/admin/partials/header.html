@@ -1,0 +1,30 @@
+<header class="main-header">
+    <a href="/#!/" class="logo">
+        <span class="logo-mini">LS</span>
+        <span class="logo-lg">LOVE STORY CMS</span>
+    </a>
+    <nav class="navbar navbar-static-top" role="navigation" data-ng-controller="HeaderController">
+        <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+            <span class="sr-only">Toggle navigation</span>
+        </a>
+        <div class="navbar-custom-menu">
+            <ul class="nav navbar-nav" ng-show="authentication.user.name">
+                <li class="dropdown user user-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="hidden-xs" data-ng-bind="authentication.user.name"></span>
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" data-ng-controller="AuthenticationController">
+                        <li>
+                            <a href="{{settings.services.webUrl}}">Trang chủ</a>
+                        </li>
+                        <li>
+                            <a data-ng-click="signout()">Đăng xuất</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</header>
+<aside class="main-sidebar" data-ng-include="'/modules/admin-core/views/header.html'"></aside>

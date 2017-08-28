@@ -1,0 +1,15 @@
+<section class="sidebar" data-ng-controller="HeaderController">
+    <ul class="sidebar-menu">
+        <li class="header">THANH ĐIỀU HƯỚNG</li>
+        <li data-ng-repeat="item in menu.items | orderBy: 'position'" data-ng-if="menu.shouldRender(authentication.user) && item.shouldRender(authentication.user);" ng-switch="item.menuItemType" ui-route="{{item.uiRoute}}" class="{{item.menuItemClass}} treeview"
+            ng-class="{active: ($uiRoute)}" dropdown="item.menuItemType === 'dropdown'">
+            <a href="/#!/{{item.link}}"><i class="fa fa-table text-aqua"></i> <span>{{item.title}}</span> <i
+					class="fa fa-angle-left pull-right"></i></a>
+            <ul class="treeview-menu">
+                <li data-ng-repeat="subitem in item.items | orderBy: 'position'" data-ng-if="subitem.shouldRender(authentication.user);" ui-route="{{subitem.uiRoute}}" ng-class="{active: $uiRoute}">
+                    <a href="/#!/{{subitem.link}}"><i class="fa fa-circle-o text-aqua"></i><span data-ng-bind="subitem.title"></span></a>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</section>

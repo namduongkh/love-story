@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{{#if meta.title }} {{meta.title}} {{else }} Login {{/if}}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <script type="text/javascript">
+        var user = {};
+        var settings = {{{json settings}}};
+    </script>
+    {{#each assets.admin.css}}
+    <link rel="stylesheet" href="{{this}}" /> {{/each}}
+</head>
+
+<body class="ng-cloak hold-transition login-page">
+    {{{ content }}} {{#each assets.admin.js}}
+    <script src="{{this}}"></script>
+    {{/each}}
+</body>
+
+</html>

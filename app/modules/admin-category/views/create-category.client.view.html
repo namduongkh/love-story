@@ -1,0 +1,124 @@
+<section data-ng-controller="CategoriesController" id="CategoriesController">
+    <section class="content-header">
+        <h1>Categories</h1>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="callout">
+                <div class="box-footer">
+                    <div class="form-group">
+                        <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
+                        &nbsp;&nbsp; -->
+                        <a class="btn btn-primary" ng-click="create(CateForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
+                        <a class="btn btn-primary" ng-click="create(CateForm.$valid)">Apply</a> &nbsp;&nbsp;
+                        <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
+                    </div>
+                    <notice-dir/>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">New Category</h3>
+                    </div>
+                    <form novalidate name="CateForm">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="name">Name</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="name" name="name" id="name" class="form-control" placeholder="Name" required>
+                                </div>
+                                <div class="error-messages message" ng-messages="CateForm.name.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="identity">Identity</label>
+                                <div class="controls">
+                                    <input type="text" ng-change="validateIdentity(identity)" data-ng-model="identity" name="identity" id="identity" class="form-control" placeholder="Identity">
+                                </div>
+                                <!--<div class="error-messages message" ng-messages="CateForm.identity.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>-->
+                                <div class="error-messages message" ng-messages="identity_error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-bind="identity_error"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="slug">Slug</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="slug" id="slug" name="slug" class="form-control" placeholder="Slug">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="community">Community</label>
+                                <div class="controls">
+                                    <select class="form-control" data-ng-model="communityId" id="community" name="community" ng-options="community._id as community.title for community in communities.items" data-placeholder="Select community" required>
+                                        </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="CateForm.community.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not select a field</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="type">Type</label>
+                                <div class="controls">
+                                    <select class="form-control" data-ng-model="type" id="type" name="type" ng-options="item.value as item.name for item in types" required>
+                                    </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="CateForm.type.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message require-msg="You did not select a field" />
+                                </div>
+                            </div>
+                            <div class="form-group" ng-if="type == 'sticker'">
+                                <label class="control-label" for="image">Image:</label>
+                                <div class="controls">
+                                    <input type="file" name="file" nv-file-select uploader="uploader" onchange="angular.element(this).scope().handleFileSelect(event,'create')">
+                                    <input type="hidden" name="image" ng-model="image">
+                                    <img ng-src="{{review_file_name}}" ng-show="review_file_name" style="max-width: 200px; max-height: 200px; padding-top: 10px">
+                                    <p class="help-block" ng-hide="image">Allow file: Image</p>
+                                    <div ng-show="isUploadImage">
+                                        <div class="progress progress-sm active">
+                                            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="error-messages message" ng-messages-multiple ng-if="submitted && image_error">
+                                    <div ng-if="image_error">You should choose an image</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="status">Status</label>
+                                <div class="controls">
+                                    <select class="form-control" ng-init="status = 1" name="status" data-ng-model="status" id="status" ng-options="item.value as item.name for item in statuses" required>
+                                    </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="CateForm.status.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message require-msg="You did not select a field" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="description">Description</label>
+                                <div class="controls">
+                                    <textarea class="form-control ck-editor" data-ng-model="description" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="box-footer">
+                            <div class="form-group">
+                                <input type="submit" class="btn btn-primary">
+                                <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
+                            </div>
+                            <div class="alert alert-danger alert-dismissable" data-ng-show="error">
+                                <h4><i class="icon fa fa-ban"></i> Error!</h4>
+                                <div data-ng-bind="error"></div>
+                            </div>
+                        </div> -->
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

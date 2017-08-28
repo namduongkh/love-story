@@ -1,0 +1,79 @@
+<section data-ng-controller="PagesController" data-ng-init="findOne()">
+    <section class="content-header">
+        <h1>Pages</h1>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="callout">
+                <div class="box-footer">
+                    <div class="form-group">
+                        <a class="btn btn-primary" ng-click="update(PageForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
+                        <a class="btn btn-primary" ng-click="update(PageForm.$valid)">Apply</a> &nbsp;&nbsp;
+                        <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()"> &nbsp;&nbsp;
+                        <input type="button" value="Delete" class="btn btn-danger" ng-click="remove(page._id)">
+                    </div>
+
+                    <notice-dir/>
+
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Edit Page</h3>
+                    </div>
+                    <form name="PageForm" novalidate>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="title">Title</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="page.title" name="title" id="title" class="form-control" placeholder="Title" required>
+                                </div>
+                                <div class="error-messages message" ng-messages="PageForm.title.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not enter a field</div>
+                                </div>
+                            </div>
+                            <!-- <div class="form-group">
+                                <label class="control-label" for="slug">Slug</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="page.slug" name="slug" id="slug" class="form-control" placeholder="Slug" required>
+                                </div>
+                                <div class="error-messages message" ng-messages="PageForm.slug.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not enter a field</div>
+                                </div>
+                            </div> -->
+                            <div class="form-group">
+                                <label class="control-label" for="identity">Identity</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="page.identity" name="identity" id="identity" class="form-control" placeholder="Identity" required>
+                                </div>
+                                <div class="error-messages message" ng-messages="PageForm.identity.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not enter a field</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="intro">Intro</label>
+                                <div class="controls">
+                                    <textarea class="form-control" name="intro" required data-ng-model="page.intro" rows="3"></textarea>
+                                </div>
+                                <div class="error-messages message" ng-messages="PageForm.intro.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not enter a field</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="content">Content</label>
+                                <div class="controls">
+                                    <textarea class="form-control" ui-tinymce="tinyMceOptions" name="content" required data-ng-model="page.content" rows="10"></textarea>
+                                </div>
+                                <div class="error-messages message" ng-messages="PageForm.content.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not enter a field</div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

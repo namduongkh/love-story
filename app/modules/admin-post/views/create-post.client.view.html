@@ -1,0 +1,198 @@
+<section data-ng-controller="PostsController" ng-init="initialPost()">
+    <section class="content-header">
+        <h1>Posts</h1>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="callout">
+                <div class="box-footer">
+                    <div class="form-group">
+                        <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
+                      &nbsp;&nbsp; -->
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
+                        <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
+                    </div>
+
+                    <notice-dir/>
+
+                </div>
+            </div>
+            <form name="PostForm" novalidate>
+                <div class="col-md-9">
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">New Post</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="title">Title</label>
+                                <div class="controls">
+                                    <input type="text" ng-change="changeSlug(title)" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.title.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="title">Slug</label>
+                                <div class="controls">
+                                    <input type="text" data-ng-model="slug" id="slug" class="form-control" placeholder="Slug">
+                                </div>
+                            </div>
+                            <!--<div class="form-group">
+                                <label class="control-label" for="teaser">Teaser</label>
+                                <div class="controls">
+                                    <textarea class="form-control" name="teaser" data-ng-model="teaser" rows="3"></textarea>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.teaser.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>-->
+                            <div class="form-group">
+                                <label class="control-label" for="thumb">Thumb</label>
+                                <div class="controls">
+                                    <input type="file" name="file0" nv-file-select uploader="uploader0" />
+                                    <input type="hidden" name="thumb" ng-model="thumb">
+                                    <img ng-src="{{review_thumb}}" ng-show="review_thumb" style="max-width: 200px; max-height: 200px; padding-top: 10px" />
+                                    <p class="help-block" ng-hide="review_thumb">Allow file: Image</p>
+                                    <div ng-show="isUploadImage0">
+                                        <div class="progress progress-sm active">
+                                            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="image">Image</label>
+                                <div class="controls">
+                                    <input type="file" name="file" nv-file-select uploader="uploader" />
+                                    <input type="hidden" name="image" ng-model="image">
+                                    <img ng-src="{{review_image}}" ng-show="review_image" style="max-width: 200px; max-height: 200px; padding-top: 10px" />
+                                    <p class="help-block" ng-hide="review_image">Allow file: Image</p>
+                                    <div ng-show="isUploadImage">
+                                        <div class="progress progress-sm active">
+                                            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="content">Content</label>
+                                <div class="controls">
+                                    <textarea class="form-control" ui-tinymce="tinymceOptions" name="content" data-ng-model="content" rows="6"></textarea>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.content.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="box box-default">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="community">Community</label>
+                                <div class="controls">
+                                    <select class="form-control" data-ng-model="community" id="community" name="community" ng-options="community._id as community.title for community in communities.items" data-placeholder="Select community" required ng-change="changeCommunity(community)">
+                                    </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.community.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not select a field</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="categories">Categories</label>
+                                <div class="controls">
+                                    <select ui-select2 class="form-control" name="category" data-ng-model="category" id="category" ng-options="category._id as category.name for category in categories.items" required>
+                                        <!-- <option value="">uncategory</option> -->
+                                    </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.category.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message require-msg="You did not select a field" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="tags">Tags</label>
+                                <div class="controls relative">
+                                    <div ng-class="{'disable-overlay':!community}"></div>
+                                    <select ui-select2="select2Options" handle-select-mutiple handle-list="taglist.items" handle-text="name" handle-value="_id" class="form-control" data-ng-model="tag" id="tag" name="tag" ng-options="tag._id as tag.name for tag in taglist.items" data-placeholder="Select tags"
+                                        multiple="multiple" ng-required="true">
+                                    </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.tag.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message require-msg="You did not select a field" />
+                                </div>
+                            </div>
+                            <!-- <div class="form-group">
+                                <label class="control-label" for="user">Poster</label>
+                                <div class="controls">
+                                    <select ui-select2 class="form-control" data-ng-model="user" id="user" name="user" ng-options="user._id as user.name for user in users.items" required>
+                                        </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
+                                    <div ng-message="required">You did not select a field</div>
+                                </div>
+                            </div> -->
+                            <div class="form-group">
+                                <label class="control-label" for="user">Poster</label>
+                                <div class="controls" input-class="form-control" id="user" search-select multi-select="false" ng-model="user" select-data="dataSearch" item-show-label="name" item-show-value="_id" fetch-data-func="fetchDataSearch" required placeholder="Select poster"></div>
+                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                                <div class="error-messages message" ng-if="submitted && userError" ng-bind="userError">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="feature">Feature</label>
+                                <div class="controls">
+                                    <select class="form-control highlight_select" name="feature" ng-init="feature = 0" data-ng-model="feature" id="feature" ng-options="item.value as item.name for item in features" required>
+                                </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.feature.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="status">Status</label>
+                                <div class="controls">
+                                    <select class="form-control highlight_select" name="status" ng-init="status = 1" data-ng-model="status" id="status" ng-options="item.value as item.name for item in statuses" required>
+                                </select>
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.status.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box box-default">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label class="control-label" for="meta_title">Meta Title</label>
+                                <div class="controls">
+                                    <textarea class="form-control" data-ng-model="attrs.title" rows="1"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="meta_desc">Meta Description</label>
+                                <div class="controls">
+                                    <textarea class="form-control" data-ng-model="attrs.description" rows="2"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="meta_desc">Meta Keyword</label>
+                                <div class="controls">
+                                    <textarea class="form-control" data-ng-model="attrs.keyword" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</section>

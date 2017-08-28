@@ -9,6 +9,39 @@
   "author": "Phong Nguyễn",
   "license": "ISC",
   "dependencies": {
-    "hapi": "^16.5.2"
+    "bcryptjs": "^2.4.3",
+    "easyimage": "^2.1.0",
+    "entities": "^1.1.1",
+    "glob": "^7.1.2",
+    "hapi": "^16.5.2",
+    "hapi-auth-jwt2": "^7.3.0",
+    "hapi-kea-config": "^0.1.5",
+    "hapi-swagger": "^7.7.1",
+    "image-downloader": "^3.2.2",
+    "inert": "^4.2.1",
+    "mongoose": "^4.11.8",
+    "mongoose-pagination": "^1.0.0",
+    "slug": "^0.9.1",
+    "striptags": "^3.1.0",
+    "vision": "^4.1.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "browser-sync": "^2.18.13",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
+    "gulp-clean-css": "^3.7.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-concat-css": "^2.3.0",
+    "gulp-load-plugins": "^1.5.0",
+    "gulp-ng-annotate": "^2.0.0",
+    "gulp-nodemon": "^2.2.1",
+    "gulp-plumber": "^1.1.0",
+    "gulp-purge-sourcemaps": "^1.0.0",
+    "gulp-sass": "^3.1.0",
+    "gulp-strip-comments": "^2.5.1",
+    "gulp-strip-debug": "^1.1.0",
+    "gulp-uglify": "^3.0.0",
+    "pump": "^1.0.2"
   }
 }

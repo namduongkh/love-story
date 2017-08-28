@@ -1,0 +1,73 @@
+/* body {
+    min-height: 700px;
+} */
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+  display: none !important; }
+
+.pagination > .active > span {
+  z-index: 3;
+  color: #fff;
+  cursor: default;
+  background-color: #337ab7;
+  border-color: #337ab7; }
+
+div.dataTables_filter {
+  text-align: left; }
+
+div.dataTables_filter select {
+  width: 75px;
+  display: inline-block; }
+
+.dataTables_filter label {
+  margin-right: 10px; }
+
+.user-name {
+  text-transform: capitalize; }
+
+.container.admin-message {
+  padding-top: 20px; }
+
+.alert {
+  padding: 10px; }
+
+.content-wrapper {
+  min-height: 700px; }
+
+.highlight_select {
+  background: #5cb85c;
+  color: #FFFFFF; }
+
+a.btn {
+  text-decoration: none; }
+
+.error-messages.message div {
+  font-weight: bold;
+  color: red; }
+
+.alert-dismissable .close,
+.alert-dismissible .close {
+  right: 1px; }
+
+.fa.fa-calendar {
+  cursor: pointer; }
+
+.filter-layout .form-group {
+  margin: 5px 10px 5px 0px !important; }
+
+.filter-layout .control-label {
+  margin-right: 10px !important; }
+
+.filter-layout .filter-submit {
+  display: block !important; }
+
+.filter-layout p {
+  margin: 0 !important; }
+
+@media (min-width: 1200px) {
+  .admin-message.container {
+    width: auto; } }

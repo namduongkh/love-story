@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CMS</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <script>document.write('<base href="' + document.location.origin + '" />');</script>
+    <script type="text/javascript">
+        var user = {{{json credentials}}};
+        var settings={{{json settings}}};
+  </script>
+    {{#each assets.admin.css}}
+    <link rel="stylesheet" href="{{this}}"/>
+    {{/each}}
+</head>
+<body class="ng-cloak skin-blue sidebar-mini">
+    <div class="wrapper">
+        {{> admin/partials/header}}
+        <div class="content-wrapper">
+            {{{ content }}}
+        </div>
+        <!-- /container -->
+        {{> admin/partials/footer}}
+
+    </div>
+
+</body>
+
+</html>
