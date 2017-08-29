@@ -1,0 +1,114 @@
+<section data-ng-controller="UsersController" data-ng-init="find()">
+    <section class="content-header">
+        <h1>Users</h1>
+    </section>
+    <!-- Loading -->
+    <ng-loading loading-done="isLoading"></ng-loading>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-info">
+                    <div class="box-header">
+                        <h3 class="box-title">List Users</h3>
+                        <div class="pull-right">
+                            <a class="btn btn-block btn-primary" data-ui-sref="createUser" style="float: left; width: 100px; margin-right: 10px">New</a>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <notice-dir/>
+                        <div class="box-tools">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="form-inline filter-layout">
+                                        <div class="form-group">
+                                            <label class="control-label" for="keyword">Keyword</label>
+                                            <input type="text" name="keyword" data-ng-model="search.keyword" id="keyword" class="form-control" placeholder="Enter keyword..." />
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label" for="roles">Role</label>
+                                            <select class="form-control" ng-change="filter()" data-ng-model="search.role" id="role" ng-options="item.value as item.name for item in userRoles" required>
+                                                <option value="">-- All role --</option>
+                                                </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label" for="status">Status</label>
+                                            <select class="form-control" ng-change="filter()" ng-init="status = 1" data-ng-model="search.status" id="status" ng-options="item.value as item.name for item in statuses" required>
+                                                <option value="">-- All status --</option>
+                                                </select>
+                                        </div>
+                                        <div class="form-group filter-submit">
+                                            <a class="btn btn-primary" ng-click="filter()">Filter</a>
+                                            <a class="btn btn-default" ng-click="reset()">Reset</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>&nbsp;</div>
+                        <div class="pull-left">
+                            <p>Total items: {{totalItems}}</p>
+                            <p>Total page: {{totalPage}}</p>
+                            <p>Total showing items: {{users.length}}</p>
+                        </div>
+                        <div>&nbsp;</div>
+                        <table id="table-list" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-ng-repeat="user in users">
+                                    <td><a ng-if="user.status != 2" data-ui-sref="editUser({userId: user._id})">{{user._id}}</a><span ng-if="user.status == 2">{{user._id}}</span></td>
+                                    <td><a ng-if="user.status != 2" data-ui-sref="editUser({userId: user._id})">{{user.name}}</a><span ng-if="user.status == 2">{{user.name}}</span></td>
+                                    <td>{{user.email}}</td>
+                                    <td>
+                                        <span class="label label-success" ng-if="user.status == 1">Publish </span>
+                                        <span class="label label-danger" ng-if="user.status == 0">Unpublish </span>
+                                        <span class="label label-danger" ng-if="user.status == 2">Trash </span>
+                                        <span class="label label-danger" ng-if="user.status == 3">Banned </span>
+                                        <span class="label label-danger" ng-if="user.status == 4">Deny </span>
+                                    </td>
+                                    <td>{{user.created | date:'medium'}}</td>
+                                    <td>
+                                        <a ng-if="user.status !== 2" data-ui-sref="editUser({userId: user._id})" title="Edit"><i class="glyphicon glyphicon-edit"></i></a> &nbsp; &nbsp;
+                                        <a ng-if="user.status !== 2" ng-click="remove(user._id)" title="Move to trash">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                        <a ng-if="user.status == 2" ng-click="remove(user._id, true)" title="Delete">
+                                            <i class="glyphicon glyphicon-trash"></i>
+                                        </a>
+                                        <a ng-if="user.status == 2" ng-click="putback(user._id)" title="Put back">
+                                            <i class="glyphicon glyphicon-arrow-left"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <approve-modal-user publish-func="publishPending"></approve-modal-user>
+                        <!-- <ul boundary-links="true" items-per-page="itemsPerPage" max-size="numberVisiblePages" uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm pull-right" previous-text="&lsaquo;" next-text="&rsaquo;"
+                            first-text="&laquo;" last-text="&raquo;"></ul> -->
+                        <bd-pagination max-page="10" name="user_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged" />
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="alert alert-warning text-center" data-ng-hide="!users.$resolved || users.length">
+                    No users yet, why don't you <a data-ui-sref="createUser">create one</a>?
+                </div>
+            </div>
+        </div>
+    </section>
+</section>

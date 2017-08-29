@@ -111,6 +111,10 @@ angular.module('core')
                                 });
                             });
                         }, 150);
+                    } else {
+                        scope.$applyAsync(function() {
+                            scope.ngModel = null;
+                        });
                     }
                 });
             }
