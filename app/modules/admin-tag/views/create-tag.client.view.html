@@ -36,7 +36,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="slug">Slug</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="slug" id="slug" name="slug" class="form-control" placeholder="Slug">
+                                    <input type="text" slug-generator="name" data-ng-model="slug" id="slug" name="slug" class="form-control" placeholder="Slug">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -46,23 +46,6 @@
                                 </div>
                                 <div class="error-messages message" ng-messages="TagForm.count.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="ordering">Ordering</label>
-                                <div class="controls">
-                                    <input type="text" data-ng-model="ordering" id="ordering" name="ordering" class="form-control" placeholder="Ordering" ui-number-mask="0">
-                                </div>
-                                <div class="error-messages message" ng-messages="TagForm.ordering.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message/>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="community">Comunity</label>
-                                <select class="form-control" data-ng-model="communityId" id="community" name="community" ng-options="item._id as item.title for item in communities.items" ng-change="changeType(communityId)" required>
-                                        </select>
-                                <div class="error-messages message" ng-messages="TagForm.community.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message require-msg="You did not select a field" />
                                 </div>
                             </div>
                             <div class="form-group">
@@ -76,13 +59,9 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="type">Type</label>
+                                <label class="control-label" for="description">Description</label>
                                 <div class="controls">
-                                    <select class="form-control" ng-init="type='product'" name="type" data-ng-model="type" id="type" ng-options="item.value as item.name for item in tagTypes" required>
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="TagForm.type.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message require-msg="You did not select a field" />
+                                    <textarea class="form-control" ui-tinymce="" name="description" data-ng-model="description" rows="6"></textarea>
                                 </div>
                             </div>
                         </div>

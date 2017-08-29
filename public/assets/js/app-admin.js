@@ -71,6 +71,149 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
         });
     }
 ]);
+'use strict'
+
+angular.module('core').directive('noticeDir', ['Notice', '$rootScope', function(Notice, $rootScope) {
+    var renderNotice = function(message, type) {
+        if (type == Notice.ERROR) {
+            return '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-exclamation-triangle"></i> Error!</h4><div>' + message + '</div></div>';
+        } else if (type == Notice.INFO) {
+            return '<div class="alert alert-info alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-info"></i> Infomation!</h4><div>' + message + '</div></div>';
+        }
+        return '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Success!</h4><div>' + message + '</div></div>'
+    };
+
+    return {
+        restrict: "E",
+        template: function(elem, attr) {
+            var notice = Notice.getNotice();
+            // $("html body").click(function() {
+            //     elem.empty();
+            // });
+
+            $rootScope.$on("CLEAR_NOTICE", function() {
+                elem.empty();
+            });
+
+            $rootScope.$on("requireChange", function() {
+                notice = Notice.getNotice();
+                // console.log('directive', notice);
+                if (notice.type == Notice.ERROR) {
+                    elem.html(renderNotice(notice.message, Notice.ERROR));
+                } else if (notice.type == Notice.INFO) {
+                    elem.html(renderNotice(notice.message, Notice.INFO));
+                } else {
+                    elem.html(renderNotice(notice.message, Notice.SUCCESS));
+                }
+            });
+
+            if (notice == "") return;
+            // console.log("Notice:", notice);
+            if (notice.type == Notice.ERROR) {
+                return renderNotice(notice.message, Notice.ERROR);
+            } else if (notice.type == Notice.INFO) {
+                return renderNotice(notice.message, Notice.INFO);
+            }
+            return renderNotice(notice.message, Notice.SUCCESS);
+        }
+    };
+
+}]);
+
+angular.module('core').directive('errorMessage', function() {
+    return {
+        restrict: 'E',
+        template: function(elem, attr) {
+            var requireMsg = attr.requireMsg || "You did not enter a field";
+            var minlengthMsg = attr.minlength ? `You should enter longer than ${attr.minlength - 1} characters` : "You should enter longer in this field";
+            var maxlengthMsg = attr.maxlength ? `You should enter shorter than ${attr.maxlength + 1} characters` : "You should enter shorter in this field";
+            return '<div ng-message="required">' + requireMsg + '</div>' +
+                '<div ng-message="email">You did not enter a email format</div>' +
+                '<div ng-message="pattern">You did not enter a right pattern</div>' +
+                '<div ng-message="number">You did not enter a number</div>' +
+                '<div ng-message="min">You should enter bigger value</div>' +
+                '<div ng-message="max">You should enter smaller value</div>' +
+                '<div ng-message="minlength">' + minlengthMsg + '</div>' +
+                '<div ng-message="maxlength">' + maxlengthMsg + '</div>';
+        }
+    };
+});
+
+angular.module('core')
+    .directive('ngLoading', function() {
+
+        var loadingSpinner = '<div id="preview-area">' +
+            '<div class="spinner">' +
+            '<div class="double-bounce1"></div>' +
+            '<div class="double-bounce2"></div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="mfp-bg bzFromTop mfp-ready"></div>';
+
+        return {
+            restrict: 'AE',
+            link: function(scope, element, attrs) {
+                scope.$watch(attrs.loadingDone, function(val) {
+                    if (val) {
+                        element.html(loadingSpinner);
+                    } else {
+                        element.html('');
+                    }
+                });
+            }
+        };
+    });
+
+angular.module('core')
+    .directive('slugGenerator', ["$timeout", function($timeout) {
+        return {
+            restrict: 'A',
+            scope: {
+                slugGenerator: "=",
+                ngModel: "="
+            },
+            link: function(scope, element, attrs) {
+                var timer;
+                scope.$watch("slugGenerator", function(value) {
+                    if (value) {
+                        $timeout.cancel(timer);
+                        timer = $timeout(function() {
+                            scope.$applyAsync(function() {
+                                scope.ngModel = slug(value, {
+                                    lower: true, // result in lower case 
+                                });
+                            });
+                        }, 150);
+                    }
+                });
+            }
+        };
+    }]);
+'use strict';
+
+angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
+    function($scope, Authentication, Menus) {
+        $scope.authentication = Authentication;
+        $scope.isCollapsed = false;
+        $scope.menu = Menus.getMenu('topbar');
+    }
+]);
+'use strict';
+
+
+angular.module('core').controller('HomeController', ['$scope', '$location', 'Authentication',
+    function($scope, $location, Authentication) {
+        // This provides Authentication context.
+        $scope.authentication = Authentication;
+
+        $scope.checkAuth = function() {
+            if (!Authentication.user.name) {
+                $location.path('signin');
+            }
+        }
+    }
+]);
+
 'use strict';
 angular.module('core').factory('Authentication', ['$window', function($window) {
     var auth = {
@@ -253,13 +396,13 @@ angular.module('core').factory("Notice", ["$rootScope", function($rootScope) {
     $rootScope.$on("$stateChangeStart", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log(currentMessage);
+        // console.log("stateChangeStart", currentMessage, queue);
     });
 
     $rootScope.$on("requireChange", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log(currentMessage);
+        // console.log("requireChange", currentMessage, queue);
     });
 
     $rootScope.$on("$stateChangeError", function() {
@@ -567,7 +710,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         if (!Authentication.user.name) {
             $location.path('signin');
         }
-        $scope.types = Option.getTypes();
+        // $scope.types = Option.getTypes();
         $scope.statuses = Option.getStatus();
         $scope.gotoList = function() {
             $location.path('categories');
@@ -575,16 +718,6 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
 
         // Create new Category
         $scope.create = function(isValid, goToList) {
-            $scope.submitted = true;
-            if (this.type == 'sticker' && !$scope.review_file_name) {
-                isValid = false;
-                $scope.image_error = true;
-            } else {
-                $scope.image_error = false;
-            }
-            if ($scope.identity_error) {
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -592,16 +725,10 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
             // Create new Category object
             var category = new Categories({
                 name: this.name,
-                identity: this.identity || null,
-                communityId: this.communityId,
                 slug: this.slug,
-                type: this.type,
                 status: this.status,
                 description: this.description
             });
-            if ($scope.changeImage && $scope.review_file_name) {
-                category.image = new Date().getTime() + '.' + $scope.extension;
-            }
             // Redirect after save
             category.$save(function(response) {
                 if (response._id) {
@@ -655,15 +782,6 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         // Update existing Category
         $scope.update = function(isValid, gotoList) {
             $scope.submitted = true;
-            if ($scope.category.type == 'sticker' && !$scope.review_file_name) {
-                isValid = false;
-                $scope.image_error = true;
-            } else {
-                $scope.image_error = false;
-            }
-            if ($scope.identity_error) {
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -671,9 +789,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
             var category = $scope.category;
             delete category.__v;
             delete category.created;
-            if ($scope.changeImage) {
-                $scope.category.image = new Date().getTime() + '.' + $scope.extension;
-            }
+
             category.$update(function(resp) {
                 if (resp.error) {
                     Notice.setNotice(response.message, 'ERROR', true);
@@ -728,7 +844,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
                 search: $scope.search
             });
             Categories.query(options, function(data) {
-                console.log('data category', data.items);
+                // console.log('data category', data.items);
                 $scope.categories = data.items;
                 $scope.totalItems = data.totalItems;
                 $scope.itemsPerPage = data.itemsPerPage;
@@ -760,29 +876,29 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         };
         //reset
         $scope.reset = function() {
-            $scope.search.keyword = "";
+            $scope.search = {};
             $scope.currentPage = 1;
             getListData();
         };
 
-        $scope.validateIdentity = function(identity) {
-            $scope.identity_error = '';
-            if (identity) {
-                Categories.getByIdentity({
-                    identity: identity
-                }, function(result) {
-                    if (result._id) {
-                        if ($scope.category) {
-                            if ($scope.category._id.toString() !== result._id.toString()) {
-                                $scope.identity_error = "This identity has exist!";
-                            }
-                        } else {
-                            $scope.identity_error = "This identity has exist!";
-                        }
-                    }
-                });
-            }
-        };
+        // $scope.validateIdentity = function(identity) {
+        //     $scope.identity_error = '';
+        //     if (identity) {
+        //         Categories.getByIdentity({
+        //             identity: identity
+        //         }, function(result) {
+        //             if (result._id) {
+        //                 if ($scope.category) {
+        //                     if ($scope.category._id.toString() !== result._id.toString()) {
+        //                         $scope.identity_error = "This identity has exist!";
+        //                     }
+        //                 } else {
+        //                     $scope.identity_error = "This identity has exist!";
+        //                 }
+        //             }
+        //         });
+        //     }
+        // };
     }
 ]);
 'use strict';
@@ -865,124 +981,6 @@ angular.module('core').directive('ckEditor', [function () {
 		}
 	};
 }]);
-
-'use strict'
-
-angular.module('core').directive('noticeDir', ['Notice', '$rootScope', function(Notice, $rootScope) {
-    var renderNotice = function(message, type) {
-        if (type == Notice.ERROR) {
-            return '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-exclamation-triangle"></i> Error!</h4><div>' + message + '</div></div>';
-        } else if (type == Notice.INFO) {
-            return '<div class="alert alert-info alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-info"></i> Infomation!</h4><div>' + message + '</div></div>';
-        }
-        return '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Success!</h4><div>' + message + '</div></div>'
-    };
-
-    return {
-        restrict: "E",
-        template: function(elem, attr) {
-            var notice = Notice.getNotice();
-            // $("html body").click(function() {
-            //     elem.empty();
-            // });
-
-            $rootScope.$on("CLEAR_NOTICE", function() {
-                elem.empty();
-            });
-
-            $rootScope.$on("requireChange", function() {
-                notice = Notice.getNotice();
-                // console.log('directive', notice);
-                if (notice.type == Notice.ERROR) {
-                    elem.html(renderNotice(notice.message, Notice.ERROR));
-                } else if (notice.type == Notice.INFO) {
-                    elem.html(renderNotice(notice.message, Notice.INFO));
-                } else {
-                    elem.html(renderNotice(notice.message, Notice.SUCCESS));
-                }
-            });
-
-            if (notice == "") return;
-            // console.log("Notice:", notice);
-            if (notice.type == Notice.ERROR) {
-                return renderNotice(notice.message, Notice.ERROR);
-            } else if (notice.type == Notice.INFO) {
-                return renderNotice(notice.message, Notice.INFO);
-            }
-            return renderNotice(notice.message, Notice.SUCCESS);
-        }
-    };
-
-}]);
-
-angular.module('core').directive('errorMessage', function() {
-    return {
-        restrict: 'E',
-        template: function(elem, attr) {
-            var requireMsg = attr.requireMsg || "You did not enter a field";
-            var minlengthMsg = attr.minlength ? `You should enter longer than ${attr.minlength - 1} characters` : "You should enter longer in this field";
-            var maxlengthMsg = attr.maxlength ? `You should enter shorter than ${attr.maxlength + 1} characters` : "You should enter shorter in this field";
-            return '<div ng-message="required">' + requireMsg + '</div>' +
-                '<div ng-message="email">You did not enter a email format</div>' +
-                '<div ng-message="pattern">You did not enter a right pattern</div>' +
-                '<div ng-message="number">You did not enter a number</div>' +
-                '<div ng-message="min">You should enter bigger value</div>' +
-                '<div ng-message="max">You should enter smaller value</div>' +
-                '<div ng-message="minlength">' + minlengthMsg + '</div>' +
-                '<div ng-message="maxlength">' + maxlengthMsg + '</div>';
-        }
-    };
-});
-
-
-angular.module('core')
-    .directive('ngLoading', function() {
-
-        var loadingSpinner = '<div id="preview-area">' +
-            '<div class="spinner">' +
-            '<div class="double-bounce1"></div>' +
-            '<div class="double-bounce2"></div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="mfp-bg bzFromTop mfp-ready"></div>';
-
-        return {
-            restrict: 'AE',
-            link: function(scope, element, attrs) {
-                scope.$watch(attrs.loadingDone, function(val) {
-                    if (val) {
-                        element.html(loadingSpinner);
-                    } else {
-                        element.html('');
-                    }
-                });
-            }
-        };
-    });
-'use strict';
-
-angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
-    function($scope, Authentication, Menus) {
-        $scope.authentication = Authentication;
-        $scope.isCollapsed = false;
-        $scope.menu = Menus.getMenu('topbar');
-    }
-]);
-'use strict';
-
-
-angular.module('core').controller('HomeController', ['$scope', '$location', 'Authentication',
-    function($scope, $location, Authentication) {
-        // This provides Authentication context.
-        $scope.authentication = Authentication;
-
-        $scope.checkAuth = function() {
-            if (!Authentication.user.name) {
-                $location.path('signin');
-            }
-        }
-    }
-]);
 
 'use strict';
 /**
@@ -1738,27 +1736,27 @@ angular.module('tag').run(['Menus',
 ]).config(['$stateProvider',
     function($stateProvider) {
         // Tags state routing
-        $stateProvider.
-        state('listTag', {
-            url: '/tags',
-            templateUrl: '/modules/admin-tag/views/list-tags.client.view.html'
-        }).
-        state('createTag', {
-            url: '/tags/create',
-            templateUrl: '/modules/admin-tag/views/create-tag.client.view.html'
-        }).
-        state('updateCountTag', {
-            url: '/tags/update-count',
-            templateUrl: '/modules/admin-tag/views/update-count-tag.client.view.html'
-        }).
-        state('viewTag', {
-            url: '/tags/:tagId',
-            templateUrl: '/modules/admin-tag/views/view-tag.client.view.html'
-        }).
-        state('editTag', {
-            url: '/tags/:tagId/edit',
-            templateUrl: '/modules/admin-tag/views/edit-tag.client.view.html'
-        });
+        $stateProvider
+            .state('listTag', {
+                url: '/tags',
+                templateUrl: '/modules/admin-tag/views/list-tags.client.view.html'
+            })
+            .state('createTag', {
+                url: '/tags/create',
+                templateUrl: '/modules/admin-tag/views/create-tag.client.view.html'
+            })
+            .state('updateCountTag', {
+                url: '/tags/update-count',
+                templateUrl: '/modules/admin-tag/views/update-count-tag.client.view.html'
+            })
+            .state('viewTag', {
+                url: '/tags/:tagId',
+                templateUrl: '/modules/admin-tag/views/view-tag.client.view.html'
+            })
+            .state('editTag', {
+                url: '/tags/:tagId/edit',
+                templateUrl: '/modules/admin-tag/views/edit-tag.client.view.html'
+            });
 
     }
 ]);
@@ -1780,7 +1778,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
     $scope.statuses = Option.getTagStatus();
 
-    $scope.tagTypes = Option.getTagType();
+    // $scope.tagTypes = Option.getTagType();
 
     $scope.find = function() {
         $scope.isLoading = true;
@@ -1872,11 +1870,8 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
         var tag = new Tags({
             name: this.name,
             slug: this.slug,
-            ordering: this.ordering || 0,
             status: this.status,
-            communityId: this.communityId,
             count: this.count || 0,
-            type: this.type || 'product',
         });
 
         // if ($scope.changeImage && $scope.review_file_name) {
@@ -1885,7 +1880,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
         tag.$save(function(response) {
             if (response._id) {
-                finishCreate()
+                finishCreate();
 
                 function finishCreate() {
                     $scope.isLoading = true;
@@ -1897,6 +1892,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
                         $scope.submitted = false;
                         $scope.name = null;
+                        Notice.requireChange();
                     }
                 }
             } else {
@@ -1906,6 +1902,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
             Notice.setNotice(errorResponse.data.message, 'ERROR', true);
         })
     };
+
     $scope.changeSlug = function(value, edit) {
         var new_slug = '';
         if (value && value.length > 0) {
@@ -1954,8 +1951,6 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
                     if (gotoList) {
                         $scope.gotoList();
                     } else {
-                        // $location.path('transactions/' + transaction._id);
-                        // $scope.success = "Update page success!";
                         $scope.submitted = false;
                         Notice.requireChange();
                     }
@@ -1996,7 +1991,8 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
     $scope.gotoList = function() {
         $location.path('tags');
-    }
+    };
+
     $scope.filter = function() {
         $scope.currentPage = 1;
         getListData();
@@ -2023,6 +2019,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
             }
         });
     };
+
     $scope.updateFinish = false;
     $scope.convertCountTag = function() {
         // console.log('=========')

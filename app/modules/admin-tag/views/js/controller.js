@@ -15,7 +15,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
     $scope.statuses = Option.getTagStatus();
 
-    $scope.tagTypes = Option.getTagType();
+    // $scope.tagTypes = Option.getTagType();
 
     $scope.find = function() {
         $scope.isLoading = true;
@@ -107,11 +107,8 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
         var tag = new Tags({
             name: this.name,
             slug: this.slug,
-            ordering: this.ordering || 0,
             status: this.status,
-            communityId: this.communityId,
             count: this.count || 0,
-            type: this.type || 'product',
         });
 
         // if ($scope.changeImage && $scope.review_file_name) {
@@ -120,7 +117,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
         tag.$save(function(response) {
             if (response._id) {
-                finishCreate()
+                finishCreate();
 
                 function finishCreate() {
                     $scope.isLoading = true;
@@ -132,6 +129,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
                         $scope.submitted = false;
                         $scope.name = null;
+                        Notice.requireChange();
                     }
                 }
             } else {
@@ -141,6 +139,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
             Notice.setNotice(errorResponse.data.message, 'ERROR', true);
         })
     };
+
     $scope.changeSlug = function(value, edit) {
         var new_slug = '';
         if (value && value.length > 0) {
@@ -189,8 +188,6 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
                     if (gotoList) {
                         $scope.gotoList();
                     } else {
-                        // $location.path('transactions/' + transaction._id);
-                        // $scope.success = "Update page success!";
                         $scope.submitted = false;
                         Notice.requireChange();
                     }
@@ -231,7 +228,8 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
 
     $scope.gotoList = function() {
         $location.path('tags');
-    }
+    };
+
     $scope.filter = function() {
         $scope.currentPage = 1;
         getListData();
@@ -258,6 +256,7 @@ function TagController($scope, $window, Tags, Option, $stateParams, Notice, $loc
             }
         });
     };
+
     $scope.updateFinish = false;
     $scope.convertCountTag = function() {
         // console.log('=========')

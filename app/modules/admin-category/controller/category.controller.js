@@ -116,11 +116,8 @@ exports.save = {
         payload: {
             name: Joi.string().required().description('Title'),
             slug: Joi.string().description('Slug'),
-            type: Joi.string().required().description('Type'),
-            image: Joi.any().description('Image'),
             status: Joi.number().required().description('Status'),
             description: Joi.any().description('Description'),
-            communityId: Joi.any().description('CommunityId'),
         },
         options: {
             allowUnknown: true
@@ -160,13 +157,9 @@ exports.update = {
             description: Joi.any().description('Description'),
             slug: Joi.string().description('Slug'),
             // identity: Joi.string().required().description('Identity'),
-            type: Joi.string().required().description('Type'),
             status: Joi.number().required().description('Status'),
             _id: Joi.string().description('MongoID'),
-            image: Joi.any().description('Image'),
             modified: Joi.any().description('Modified'),
-            ordering: Joi.any().description('Ordering'),
-            communityId: Joi.any().description('CommunityId'),
             //parent: Joi.any().description('Parent'),
 
         },

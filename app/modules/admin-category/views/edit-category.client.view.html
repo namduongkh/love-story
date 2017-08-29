@@ -35,59 +35,9 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="identity">Identity</label>
-                                <div class="controls">
-                                    <input type="text" data-ng-model="category.identity" name="identity" id="identity" class="form-control" placeholder="Identity">
-                                </div>
-                                <!--<div class="error-messages message" ng-messages="CateForm.identity.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message/>
-                                </div>-->
-                                <div class="error-messages message" ng-messages="identity_error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-bind="identity_error"></div>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label class="control-label" for="slug">Slug</label>
                                 <div class="controls">
                                     <input type="text" data-ng-model="category.slug" name="slug" id="slug" class="form-control" placeholder="Slug">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="community">Community</label>
-                                <div class="controls">
-                                    <select class="form-control" data-ng-model="category.communityId" id="community" name="community" ng-options="community._id as community.title for community in communities.items" data-placeholder="Select community" required>
-                                            </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="CateForm.community.$error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-message="required">You did not select a field</div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="type">Type</label>
-                                <div class="controls">
-                                    <select class="form-control" name="type" data-ng-model="category.type" id="type" ng-options="item.value as item.name for item in types" required>
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="CateForm.type.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message require-msg="You did not select a field" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" ng-if="category.type == 'sticker'" for="image">Image</label>
-                                <div class="controls">
-                                    <input type="file" name="file" nv-file-select uploader="uploader" onchange="angular.element(this).scope().handleFileSelect(event,'create')">
-                                    <input type="hidden" name="file_name" ng-model="category.image">
-                                    <img ng-src="{{review_file_name}}" ng-show="review_file_name" style="max-width: 200px; max-height: 200px; padding-top: 10px">
-                                    <p class="help-block" ng-hide="category.image">Allow file: Image</p>
-                                    <div ng-show="isUploadImage">
-                                        <div class="progress progress-sm active">
-                                            <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="error-messages message" ng-messages-multiple ng-if="submitted && image_error">
-                                    <div ng-if="image_error">You should choose an image</div>
                                 </div>
                             </div>
                             <div class="form-group">
@@ -103,7 +53,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="description">Description</label>
                                 <div class="controls">
-                                    <textarea class="form-control ck-editor" data-ng-model="category.description" rows="3"></textarea>
+                                    <textarea class="form-control" ui-tinymce="" name="description" data-ng-model="category.description" rows="6"></textarea>
                                 </div>
                             </div>
                         </div>

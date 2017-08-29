@@ -206,14 +206,9 @@ exports.save = {
             name: Joi.string().required().description('Title'),
             slug: Joi.string().description('Slug'),
             ordering: Joi.any().description('Ordering'),
-            type: Joi.any().description('Type'),
             status: Joi.number().required().description('Status'),
-            communityId: Joi.string().required().description('community'),
             count: Joi.number().required().description('Count'),
-            // description: Joi.any().description('Description'),
-            // scope: Joi.string().description('Scope'),
-            // type: Joi.string().description('Type'),
-            // image: Joi.any().description('Image'),
+            description: Joi.any().description('Description'),
         },
         options: {
             allowUnknown: true
@@ -256,13 +251,7 @@ exports.update = {
             _id: Joi.string().description('MongoID'),
             modified: Joi.any().description('Modified'),
             ordering: Joi.any().description('Ordering'),
-            type: Joi.any().description('Type'),
-            communityId: Joi.string().required().description('community'),
             count: Joi.number().required().description('Count'),
-            // scope: Joi.string().description('Scope'),
-            // type: Joi.string().description('Type'),
-            // image: Joi.any().description('Image'),
-            // description: Joi.any().description('Description'),
         },
         options: {
             allowUnknown: true

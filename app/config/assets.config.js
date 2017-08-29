@@ -17,6 +17,7 @@ module.exports = {
             noaction: [
                 '/libs/tinymce/tinymce.min.js',
                 '/libs/angular-ui-tinymce/dist/tinymce.min.js',
+                '/libs/slug/slug.js'
             ],
             concat: [
                 '/libs/angular/angular.min.js',

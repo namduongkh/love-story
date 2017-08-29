@@ -66,7 +66,6 @@ angular.module('core').directive('errorMessage', function() {
     };
 });
 
-
 angular.module('core')
     .directive('ngLoading', function() {
 
@@ -86,6 +85,32 @@ angular.module('core')
                         element.html(loadingSpinner);
                     } else {
                         element.html('');
+                    }
+                });
+            }
+        };
+    });
+
+angular.module('core')
+    .directive('slugGenerator', function($timeout) {
+        return {
+            restrict: 'A',
+            scope: {
+                slugGenerator: "=",
+                ngModel: "="
+            },
+            link: function(scope, element, attrs) {
+                var timer;
+                scope.$watch("slugGenerator", function(value) {
+                    if (value) {
+                        $timeout.cancel(timer);
+                        timer = $timeout(function() {
+                            scope.$applyAsync(function() {
+                                scope.ngModel = slug(value, {
+                                    lower: true, // result in lower case 
+                                });
+                            });
+                        }, 150);
                     }
                 });
             }

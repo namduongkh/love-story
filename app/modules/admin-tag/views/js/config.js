@@ -13,27 +13,27 @@ angular.module('tag').run(['Menus',
 ]).config(['$stateProvider',
     function($stateProvider) {
         // Tags state routing
-        $stateProvider.
-        state('listTag', {
-            url: '/tags',
-            templateUrl: '/modules/admin-tag/views/list-tags.client.view.html'
-        }).
-        state('createTag', {
-            url: '/tags/create',
-            templateUrl: '/modules/admin-tag/views/create-tag.client.view.html'
-        }).
-        state('updateCountTag', {
-            url: '/tags/update-count',
-            templateUrl: '/modules/admin-tag/views/update-count-tag.client.view.html'
-        }).
-        state('viewTag', {
-            url: '/tags/:tagId',
-            templateUrl: '/modules/admin-tag/views/view-tag.client.view.html'
-        }).
-        state('editTag', {
-            url: '/tags/:tagId/edit',
-            templateUrl: '/modules/admin-tag/views/edit-tag.client.view.html'
-        });
+        $stateProvider
+            .state('listTag', {
+                url: '/tags',
+                templateUrl: '/modules/admin-tag/views/list-tags.client.view.html'
+            })
+            .state('createTag', {
+                url: '/tags/create',
+                templateUrl: '/modules/admin-tag/views/create-tag.client.view.html'
+            })
+            .state('updateCountTag', {
+                url: '/tags/update-count',
+                templateUrl: '/modules/admin-tag/views/update-count-tag.client.view.html'
+            })
+            .state('viewTag', {
+                url: '/tags/:tagId',
+                templateUrl: '/modules/admin-tag/views/view-tag.client.view.html'
+            })
+            .state('editTag', {
+                url: '/tags/:tagId/edit',
+                templateUrl: '/modules/admin-tag/views/edit-tag.client.view.html'
+            });
 
     }
 ]);

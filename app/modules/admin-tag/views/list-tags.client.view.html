@@ -2,8 +2,6 @@
     <section class="content-header">
         <h1>Tags</h1>
     </section>
-    <!-- Loading -->
-    <ng-loading loading-done="isLoading" />
     <!-- Main content -->
     <section class="content">
         <div class="row">
@@ -19,12 +17,6 @@
                     <div class="box-body">
                         <notice-dir/>
                         <div class="box-tools">
-                            <!--<div class="input-group" style="width: 150px;">
-                                <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search" />
-                                <div class="input-group-btn">
-                                    <button ng-click="filter()" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
-                                </div>
-                            </div>-->
                             <div class="col-md-12">
                                 <div class="row">
                                     <div class="form-inline filter-layout">
@@ -32,27 +24,12 @@
                                             <label class="control-label" for="keyword">Keyword</label>
                                             <input type="text" name="keyword" data-ng-model="search.keyword" id="keyword" class="form-control" placeholder="Enter keyword..." />
                                         </div>
-
-                                        <div class="form-group">
-                                            <label class="control-label" for="community">Community</label>
-                                            <select class="form-control" ng-change="filter()" data-ng-model="search.communityId" id="community" ng-options="item._id as item.title for item in communities.items">
-                                                <option value="">-- All community --</option>
-                                                </select>
-                                        </div>
                                         <div class="form-group">
                                             <label class="control-label" for="status">Status</label>
                                             <select class="form-control" ng-change="filter()" data-ng-model="search.status" id="status" ng-options="item.value as item.name for item in statuses">
                                                 <option value="">-- All status --</option>
                                                 </select>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label class="control-label" for="type">Type</label>
-                                            <select class="form-control" ng-change="filter()" data-ng-model="search.type" id="type" ng-options="item.value as item.name for item in tagTypes">
-                                                <option value="">-- All type --</option>
-                                                </select>
-                                        </div>
-
                                         <div class="form-group filter-submit">
                                             <a class="btn btn-primary" ng-click="filter()">Filter</a>
                                             <a class="btn btn-default" ng-click="reset()">Reset</a>
@@ -73,20 +50,12 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Name</th>
-                                    <th ng-click="order('communityId')">
-                                        Community
-                                        <span ng-class="search.order && search.order.field == 'communityId' ? 'glyphicon ' + (search.order.type == 1 ? 'glyphicon-sort-by-alphabet':'glyphicon-sort-by-alphabet-alt'):'glyphicon glyphicon-resize-horizontal'" style="cursor: pointer;"></span>
-                                    </th>
                                     <th>Status </th>
                                     <th ng-click="order('count')">
                                         Count
                                         <span ng-class="search.order && search.order.field == 'count' ? 'glyphicon ' + (search.order.type == 1 ? 'glyphicon-chevron-down':'glyphicon-chevron-up'):'glyphicon glyphicon-resize-horizontal'" style="cursor: pointer;"></span>
                                     </th>
-                                    <!--<th>Scope</th>
-                                    <th>Image</th>-->
-                                    <th>Type</th>
                                     <th>Created on</th>
-                                    <!-- <th>Created by</th> -->
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -94,23 +63,13 @@
                                 <tr data-ng-repeat="tag in tags">
                                     <td><a data-ui-sref="editTag({tagId: tag._id})">{{tag._id}}</a></td>
                                     <td>{{tag.name}}</td>
-                                    <td>{{tag.communityId.title || 'không có'}}</td>
                                     <td>
                                         <span class="label label-success" ng-if="tag.status == 1">Publish </span>
                                         <span class="label label-danger" ng-if="tag.status == 0">Unpublish </span>
                                         <span class="label label-danger" ng-if="tag.status == 2">Pending </span>
                                     </td>
                                     <td>{{ tag.count ? tag.count : 0 }}</td>
-                                    <!--<td>
-                                         <select class="form-control" data-ng-model="tag.scope" id="scope" name="scope" ng-options="item._id as item.identity for item in scopes.items" ng-disabled="true"></select> 
-                                        <span ng-bind="tag.scope.identity"></span>
-                                    </td>
-                                    <td>
-                                        <img ng-if="tag.image" ng-src="{{tag.image}}" alt="" width="100px">
-                                    </td>-->
-                                    <td>{{tag.type}}</td>
                                     <td>{{tag.created | date:'medium'}}</td>
-                                    <!-- <td>{{tag.user.displayName}}</td> -->
                                     <td>
                                         <a data-ui-sref="editTag({tagId: tag._id})" title="Edit"><i class="glyphicon glyphicon-edit"></i></a> &nbsp; &nbsp;
                                         <a ng-click="remove(tag._id)" title="Delete">

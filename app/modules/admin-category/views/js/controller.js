@@ -9,7 +9,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         if (!Authentication.user.name) {
             $location.path('signin');
         }
-        $scope.types = Option.getTypes();
+        // $scope.types = Option.getTypes();
         $scope.statuses = Option.getStatus();
         $scope.gotoList = function() {
             $location.path('categories');
@@ -17,16 +17,6 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
 
         // Create new Category
         $scope.create = function(isValid, goToList) {
-            $scope.submitted = true;
-            if (this.type == 'sticker' && !$scope.review_file_name) {
-                isValid = false;
-                $scope.image_error = true;
-            } else {
-                $scope.image_error = false;
-            }
-            if ($scope.identity_error) {
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -34,16 +24,10 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
             // Create new Category object
             var category = new Categories({
                 name: this.name,
-                identity: this.identity || null,
-                communityId: this.communityId,
                 slug: this.slug,
-                type: this.type,
                 status: this.status,
                 description: this.description
             });
-            if ($scope.changeImage && $scope.review_file_name) {
-                category.image = new Date().getTime() + '.' + $scope.extension;
-            }
             // Redirect after save
             category.$save(function(response) {
                 if (response._id) {
@@ -97,15 +81,6 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         // Update existing Category
         $scope.update = function(isValid, gotoList) {
             $scope.submitted = true;
-            if ($scope.category.type == 'sticker' && !$scope.review_file_name) {
-                isValid = false;
-                $scope.image_error = true;
-            } else {
-                $scope.image_error = false;
-            }
-            if ($scope.identity_error) {
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -113,9 +88,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
             var category = $scope.category;
             delete category.__v;
             delete category.created;
-            if ($scope.changeImage) {
-                $scope.category.image = new Date().getTime() + '.' + $scope.extension;
-            }
+
             category.$update(function(resp) {
                 if (resp.error) {
                     Notice.setNotice(response.message, 'ERROR', true);
@@ -170,7 +143,7 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
                 search: $scope.search
             });
             Categories.query(options, function(data) {
-                console.log('data category', data.items);
+                // console.log('data category', data.items);
                 $scope.categories = data.items;
                 $scope.totalItems = data.totalItems;
                 $scope.itemsPerPage = data.itemsPerPage;
@@ -202,28 +175,28 @@ angular.module('categories').controller('CategoriesController', ['$scope', '$win
         };
         //reset
         $scope.reset = function() {
-            $scope.search.keyword = "";
+            $scope.search = {};
             $scope.currentPage = 1;
             getListData();
         };
 
-        $scope.validateIdentity = function(identity) {
-            $scope.identity_error = '';
-            if (identity) {
-                Categories.getByIdentity({
-                    identity: identity
-                }, function(result) {
-                    if (result._id) {
-                        if ($scope.category) {
-                            if ($scope.category._id.toString() !== result._id.toString()) {
-                                $scope.identity_error = "This identity has exist!";
-                            }
-                        } else {
-                            $scope.identity_error = "This identity has exist!";
-                        }
-                    }
-                });
-            }
-        };
+        // $scope.validateIdentity = function(identity) {
+        //     $scope.identity_error = '';
+        //     if (identity) {
+        //         Categories.getByIdentity({
+        //             identity: identity
+        //         }, function(result) {
+        //             if (result._id) {
+        //                 if ($scope.category) {
+        //                     if ($scope.category._id.toString() !== result._id.toString()) {
+        //                         $scope.identity_error = "This identity has exist!";
+        //                     }
+        //                 } else {
+        //                     $scope.identity_error = "This identity has exist!";
+        //                 }
+        //             }
+        //         });
+        //     }
+        // };
     }
 ]);

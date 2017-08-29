@@ -180,13 +180,13 @@ angular.module('core').factory("Notice", function($rootScope) {
     $rootScope.$on("$stateChangeStart", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log(currentMessage);
+        // console.log("stateChangeStart", currentMessage, queue);
     });
 
     $rootScope.$on("requireChange", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log(currentMessage);
+        // console.log("requireChange", currentMessage, queue);
     });
 
     $rootScope.$on("$stateChangeError", function() {
