@@ -21,6 +21,9 @@ var UserSchema = new Schema({
         type: String,
         // validate: [validateLocalStrategyPassword, 'Password should be longer']
     },
+    slug: {
+        type: String,
+    },
     roles: {
         type: [{
             type: String,

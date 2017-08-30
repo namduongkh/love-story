@@ -579,10 +579,6 @@ exports.edit = {
     handler: function(request, reply) {
 
         let user = request.pre.user;
-        if (user != null && user.district && user.district.province) {
-            user.province = user.district.province._id
-            user.district = user.district._id
-        }
         if (user) {
             return reply(user);
         } else {
@@ -1090,31 +1086,14 @@ function getById(request, reply) {
 
     const id = request.params.id || request.payload.id;
     let promise = User.findOne({
-            '_id': id
-        }).populate({
-            path: 'district',
-            model: 'District',
-            populate: {
-                path: 'province',
-                model: 'Province'
-            }
-        })
-        // .lean();
+        '_id': id
+    });
+    // .lean();
     promise.then(function(user) {
         if (user && user._id) {
-            UserRequest.findOne({
-                    'user_id': new mongoose.mongo.ObjectId(user._id)
-                })
-                .then(function(userRe) {
-                    user.is_sendmail_approved = userRe && userRe.is_sendmail_approved ? userRe.is_sendmail_approved : 0;
-                    console.log(user.is_sendmail_approved)
-                    return reply(user);
-                })
-                .catch(function(err) {
-                    return reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
-                });
-        } else {
             return reply(user);
+        } else {
+            return reply.continue();
         }
     }).catch(function(err) {
         request.log(['error'], err);

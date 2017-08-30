@@ -12,12 +12,11 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
 
         $scope.statuses = Option.getStatus();
 
-        $scope.features = Option.getFeaturePost();
+        $scope.features = Option.getFeatures();
 
         $scope.authentication = Authentication;
 
         $scope.tags = {};
-
 
         ///thumb upload
 
@@ -94,9 +93,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             $location.path('posts');
         }
 
-        $scope.categories = Categories.query({
-            type: 'post'
-        });
+        $scope.categories = Categories.query({});
 
         // Create new Post
         $scope.create = function(isValid, gotoList) {

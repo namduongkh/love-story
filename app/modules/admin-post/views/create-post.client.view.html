@@ -29,7 +29,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="title">Title</label>
                                 <div class="controls">
-                                    <input type="text" ng-change="changeSlug(title)" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
+                                    <input type="text" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
                                 </div>
                                 <div class="error-messages message" ng-messages="PostForm.title.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
@@ -38,7 +38,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="title">Slug</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="slug" id="slug" class="form-control" placeholder="Slug">
+                                    <input type="text" data-ng-model="slug" id="slug" class="form-control" placeholder="Slug" slug-generator="title">
                                 </div>
                             </div>
                             <!--<div class="form-group">
@@ -95,16 +95,6 @@
                 <div class="col-md-3">
                     <div class="box box-default">
                         <div class="box-body">
-                            <div class="form-group">
-                                <label class="control-label" for="community">Community</label>
-                                <div class="controls">
-                                    <select class="form-control" data-ng-model="community" id="community" name="community" ng-options="community._id as community.title for community in communities.items" data-placeholder="Select community" required ng-change="changeCommunity(community)">
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.community.$error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-message="required">You did not select a field</div>
-                                </div>
-                            </div>
                             <div class="form-group">
                                 <label class="control-label" for="categories">Categories</label>
                                 <div class="controls">

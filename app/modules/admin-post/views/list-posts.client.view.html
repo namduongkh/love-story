@@ -32,12 +32,6 @@
                                             <input type="text" name="keyword" data-ng-model="search.keyword" id="keyword" class="form-control" placeholder="Enter keyword..." />
                                         </div>
                                         <div class="form-group">
-                                            <label class="control-label" for="community">Community</label>
-                                            <select class="form-control" ng-change="filter()" data-ng-model="search.communityId" id="community" ng-options="item._id as item.title for item in communities.items">
-                                                    <option value="">-- All community --</option>
-                                                    </select>
-                                        </div>
-                                        <div class="form-group">
                                             <label class="control-label" for="category">Categories</label>
                                             <select class="form-control" ng-change="filter()" data-ng-model="search.category" id="category" ng-options="category._id as category.name for category in categories.items">
                                                         <option value="">-- All category --</option>
@@ -84,7 +78,6 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Title</th>
-                                    <th>Community</th>
                                     <th>Category</th>
                                     <th>Feature</th>
                                     <th>Status</th>
@@ -97,7 +90,6 @@
                                 <tr data-ng-repeat="post in items | filter: query">
                                     <td><a data-ui-sref="editPost({postId: post._id})">{{post._id}}</a></td>
                                     <td>{{post.title}}</td>
-                                    <td>{{post.communityId.title}}</td>
                                     <td>
                                         {{post.category.name}}
                                     </td>
