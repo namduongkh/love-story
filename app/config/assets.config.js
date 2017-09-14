@@ -9,9 +9,11 @@ module.exports = {
                 '/libs/angular-cookies/angular-cookies.min.js',
                 '/libs/angular-local-storage/dist/angular-local-storage.min.js',
                 '/libs/angular-sanitize/angular-sanitize.min.js',
-                '/libs/AdminLTE/plugins/select2/select2.min.js',
                 '/libs/angular-messages/angular-messages.min.js',
                 '/libs/ng-file-upload/ng-file-upload.min.js',
+                // '/libs/select2/select2.min.js',
+                // '/libs/AdminLTE/plugins/select2/select2.min.js',
+                // '/libs/angular-ui-select2/src/select2.js',
                 '/assets/js/app-admin.js',
             ],
             noaction: [
@@ -31,7 +33,8 @@ module.exports = {
             '/libs/AdminLTE/dist/css/AdminLTE.min.css',
             '/libs/AdminLTE/plugins/datatables/dataTables.bootstrap.css',
             '/libs/AdminLTE/dist/css/skins/skin-blue.min.css',
-            '/libs/AdminLTE/plugins/select2/select2.min.css',
+            // '/libs/select2/select2-bootstrap.css',
+            // '/libs/AdminLTE/plugins/select2/select2.min.css',
             '/assets/css/styles-admin.css',
         ]
     }

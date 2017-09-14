@@ -172,40 +172,64 @@ angular.module('core').service('Menus', [
     }
 ]);
 
-angular.module('core').factory("Notice", function($rootScope) {
+angular.module('core').factory("Notice", function($rootScope, $transitions) {
     var queue = [];
     var oldMessage = "";
     var currentMessage = "";
 
-    $rootScope.$on("$stateChangeStart", function() {
+    $transitions.onStart({}, function(trans) {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log("stateChangeStart", currentMessage, queue);
+        // console.log("onStart")
     });
+
+    $transitions.onError({}, function(trans) {
+        queue.push(oldMessage);
+        currentMessage = "";
+        // console.log("onError")
+    });
+
+    // $rootScope.$on("$stateChangeStart", function() {
+    //     console.log("$stateChangeStart");
+    //     oldMessage = currentMessage;
+    //     currentMessage = queue.shift() || "";
+    //     // console.log(currentMessage);
+    // });
 
     $rootScope.$on("requireChange", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log("requireChange", currentMessage, queue);
+        // console.log(currentMessage);
     });
 
-    $rootScope.$on("$stateChangeError", function() {
-        queue.push(oldMessage);
-        currentMessage = "";
-    });
+    // $rootScope.$on("$stateChangeError", function() {
+    //     queue.push(oldMessage);
+    //     currentMessage = "";
+    // });
+
+    function _setNotice(message, type, require) {
+        var require = typeof require !== 'undefined' ? require : false;
+        queue.push({
+            type: type,
+            message: message
+        });
+        if (require) {
+            $rootScope.$broadcast('requireChange');
+            // console.log('requireChange');
+        }
+        // console.log('Queue',queue);
+    }
 
     return {
-        setNotice: function(message, type, require) {
-            var require = typeof require !== 'undefined' ? require : false;
-            queue.push({
-                type: type,
-                message: message
-            });
-            if (require) {
-                $rootScope.$broadcast('requireChange');
-                // console.log('requireChange');
-            }
-            // console.log('Queue',queue);
+        setNotice: _setNotice,
+        error: function(message, require) {
+            _setNotice(message, 'ERROR', require);
+        },
+        success: function(message, require) {
+            _setNotice(message, 'SUCCESS', require);
+        },
+        info: function(message, require) {
+            _setNotice(message, 'INFO', require);
         },
         getNotice: function() {
             return currentMessage;

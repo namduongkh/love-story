@@ -263,8 +263,8 @@ exports.getList = {
     handler: function(request, reply) {
         let promise = Tag.find({
             status: 1,
-            count: { $gt: 0 },
-            type: "post"
+            // count: { $gt: 0 },
+            // type: "post"
         });
         promise.then(function(tag) {
             reply({ status: 1, items: tag });

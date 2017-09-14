@@ -18,6 +18,8 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
 
         $scope.tags = {};
 
+        $scope.renderSelect = {};
+
         ///thumb upload
 
         $scope.isUploadImage0 = false;
@@ -78,7 +80,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         // Init post
-        $scope.tags = Tags.getList({}, function(result) {});
+        $scope.taglist = Tags.getList({}, function(result) {
+            $scope.renderSelect.tag = true;
+        });
         $scope.users = Users.query({
             role: 'user',
             page: 'all',
@@ -223,9 +227,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             $scope.post = Posts.get({
                 postId: $stateParams.postId
             }, function(resp) {
-                Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'post' }, function(result) {
-                    $scope.taglist = result;
-                })
+                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'post' }, function(result) {
+                //     $scope.taglist = result;
+                // })
                 if ($scope.post.thumb) {
                     $scope.review_thumb = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.thumb;
                 }
@@ -234,7 +238,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 }
                 if ($scope.post.user) {
                     SearchSelectSvc.updateNgModel($scope.post.user);
-
                 }
             });
         };
@@ -311,23 +314,23 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             getListData();
         };
 
-        // change communities
-        $scope.changeCommunity = function(communityId) {
-            Tags.query({
-                communityId: communityId,
-                status: 1,
-                getList: 'true',
-                type: 'post'
-            }, function(result) {
-                $scope.taglist = result;
-            })
-            $scope.users = Users.query({
-                role: 'user',
-                page: 'all',
-                registerCommunity: communityId,
-                status: 1
-            }, function(resp) {});
-        }
+        // // change communities
+        // $scope.changeCommunity = function(communityId) {
+        //     Tags.query({
+        //         communityId: communityId,
+        //         status: 1,
+        //         getList: 'true',
+        //         type: 'post'
+        //     }, function(result) {
+        //         $scope.taglist = result;
+        //     })
+        //     $scope.users = Users.query({
+        //         role: 'user',
+        //         page: 'all',
+        //         registerCommunity: communityId,
+        //         status: 1
+        //     }, function(resp) {});
+        // }
 
         // tag create
         $scope.select2Options = {
@@ -360,6 +363,14 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             }, function(data) {
                 $scope.dataSearch = data.items;
             });
+        };
+
+        $scope.changePoster = function() {
+            console.log("xxxx", $scope.user);
+        };
+
+        $scope.posterOptions = {
+
         };
     }
 ]);

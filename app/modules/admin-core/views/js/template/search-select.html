@@ -1,0 +1,15 @@
+<div class="search-select" ng-class="class" style="{{style}}">
+    <div style="{{panelStyle}}" class="selected-panel" ng-if="selectItem && selectItem.length">
+        <div class="selected-item" ng-repeat="item in selectItem track by $index" ng-click="$deSelectItem(item, $index)">
+            <i class="glyphicon glyphicon-trash"></i>
+            <span ng-bind="item[itemShowLabel]"></span>
+        </div>
+    </div>
+    <input ng-if="showInput" placeholder="{{placeholder}}" ng-class="inputClass" ng-model="$search_input" ng-change="$changeInputSearch($search_input)" ng-focus="$searchInputFocus($search_input)" ng-blur="$searchInputBlur()" />
+    <div class="select-data" ng-if="$showSelectData">
+        <div class="select-data-panel">
+            <div ng-if="resultItems && resultItems.length && !$hasExist(item)" class="select-data-item" ng-repeat="item in resultItems track by $index" ng-bind="item[itemShowLabel]" ng-click="$selectItem(item, $index)"></div>
+            <div ng-if="!resultItems || !resultItems.length" class="select-data-item">No sult. Enter keyword!</div>
+        </div>
+    </div>
+</div>

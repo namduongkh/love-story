@@ -71,348 +71,6 @@ angular.module('core').config(['$stateProvider', '$urlRouterProvider',
         });
     }
 ]);
-'use strict'
-
-angular.module('core').directive('noticeDir', ['Notice', '$rootScope', function(Notice, $rootScope) {
-    var renderNotice = function(message, type) {
-        if (type == Notice.ERROR) {
-            return '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-exclamation-triangle"></i> Error!</h4><div>' + message + '</div></div>';
-        } else if (type == Notice.INFO) {
-            return '<div class="alert alert-info alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-info"></i> Infomation!</h4><div>' + message + '</div></div>';
-        }
-        return '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Success!</h4><div>' + message + '</div></div>'
-    };
-
-    return {
-        restrict: "E",
-        template: function(elem, attr) {
-            var notice = Notice.getNotice();
-            // $("html body").click(function() {
-            //     elem.empty();
-            // });
-
-            $rootScope.$on("CLEAR_NOTICE", function() {
-                elem.empty();
-            });
-
-            $rootScope.$on("requireChange", function() {
-                notice = Notice.getNotice();
-                // console.log('directive', notice);
-                if (notice.type == Notice.ERROR) {
-                    elem.html(renderNotice(notice.message, Notice.ERROR));
-                } else if (notice.type == Notice.INFO) {
-                    elem.html(renderNotice(notice.message, Notice.INFO));
-                } else {
-                    elem.html(renderNotice(notice.message, Notice.SUCCESS));
-                }
-            });
-
-            if (notice == "") return;
-            // console.log("Notice:", notice);
-            if (notice.type == Notice.ERROR) {
-                return renderNotice(notice.message, Notice.ERROR);
-            } else if (notice.type == Notice.INFO) {
-                return renderNotice(notice.message, Notice.INFO);
-            }
-            return renderNotice(notice.message, Notice.SUCCESS);
-        }
-    };
-
-}]);
-
-angular.module('core').directive('errorMessage', function() {
-    return {
-        restrict: 'E',
-        template: function(elem, attr) {
-            var requireMsg = attr.requireMsg || "You did not enter a field";
-            var minlengthMsg = attr.minlength ? `You should enter longer than ${attr.minlength - 1} characters` : "You should enter longer in this field";
-            var maxlengthMsg = attr.maxlength ? `You should enter shorter than ${attr.maxlength + 1} characters` : "You should enter shorter in this field";
-            return '<div ng-message="required">' + requireMsg + '</div>' +
-                '<div ng-message="email">You did not enter a email format</div>' +
-                '<div ng-message="pattern">You did not enter a right pattern</div>' +
-                '<div ng-message="number">You did not enter a number</div>' +
-                '<div ng-message="min">You should enter bigger value</div>' +
-                '<div ng-message="max">You should enter smaller value</div>' +
-                '<div ng-message="minlength">' + minlengthMsg + '</div>' +
-                '<div ng-message="maxlength">' + maxlengthMsg + '</div>';
-        }
-    };
-});
-
-angular.module('core')
-    .directive('ngLoading', function() {
-
-        var loadingSpinner = '<div id="preview-area">' +
-            '<div class="spinner">' +
-            '<div class="double-bounce1"></div>' +
-            '<div class="double-bounce2"></div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="mfp-bg bzFromTop mfp-ready"></div>';
-
-        return {
-            restrict: 'AE',
-            link: function(scope, element, attrs) {
-                scope.$watch(attrs.loadingDone, function(val) {
-                    if (val) {
-                        element.html(loadingSpinner);
-                    } else {
-                        element.html('');
-                    }
-                });
-            }
-        };
-    });
-
-angular.module('core')
-    .directive('slugGenerator', ["$timeout", function($timeout) {
-        return {
-            restrict: 'A',
-            scope: {
-                slugGenerator: "=",
-                ngModel: "="
-            },
-            link: function(scope, element, attrs) {
-                var timer;
-                scope.$watch("slugGenerator", function(value) {
-                    if (value) {
-                        $timeout.cancel(timer);
-                        timer = $timeout(function() {
-                            scope.$applyAsync(function() {
-                                scope.ngModel = slug(value, {
-                                    lower: true, // result in lower case 
-                                });
-                            });
-                        }, 150);
-                    } else {
-                        scope.$applyAsync(function() {
-                            scope.ngModel = null;
-                        });
-                    }
-                });
-            }
-        };
-    }]);
-'use strict';
-
-angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
-    function($scope, Authentication, Menus) {
-        $scope.authentication = Authentication;
-        $scope.isCollapsed = false;
-        $scope.menu = Menus.getMenu('topbar');
-    }
-]);
-'use strict';
-
-
-angular.module('core').controller('HomeController', ['$scope', '$location', 'Authentication',
-    function($scope, $location, Authentication) {
-        // This provides Authentication context.
-        $scope.authentication = Authentication;
-
-        $scope.checkAuth = function() {
-            if (!Authentication.user.name) {
-                $location.path('signin');
-            }
-        }
-    }
-]);
-
-(function() {
-    'use strict';
-
-
-
-    angular
-        .module('core')
-        .service('SearchSelectSvc', ["$rootScope", function($rootScope) {
-            return {
-                updateNgModel: function(data) {
-                    $rootScope.$broadcast("UPDATE_NG_MODEL", data);
-                }
-            }
-        }]);
-
-
-    angular
-        .module('core')
-        .directive('searchSelect', ["$compile", "$timeout", "$rootScope", function($compile, $timeout, $rootScope) {
-            function render() {
-                return '\
-                <div class="search-select" ng-class="class" style="{{style}}">\
-                    <div style="{{panelStyle}}" class="selected-panel" ng-if="selectItem && selectItem.length">\
-                        <div class="selected-item" ng-repeat="item in selectItem track by $index" ng-click="$deSelectItem(item, $index)">\
-                            <i class="glyphicon glyphicon-trash"></i>\
-                            <span ng-bind="item[itemShowLabel]"></span>\
-                        </div>\
-                    </div>\
-                    <input ng-if="showInput" placeholder="{{placeholder}}" ng-class="inputClass" ng-model="$search_input" ng-change="$changeInputSearch($search_input)" ng-focus="$searchInputFocus($search_input)" ng-blur="$searchInputBlur()"/>\
-                    <div class="select-data" ng-if="$showSelectData">\
-                        <div class="select-data-panel">\
-                            <div ng-if="selectData && selectData.length && !$hasExist(item)" class="select-data-item" ng-repeat="item in selectData track by $index" ng-bind="item[itemShowLabel]" ng-click="$selectItem(item, $index)"></div>\
-                            <div ng-if="!selectData || !selectData.length" class="select-data-item">No sult. Enter keyword!</div>\
-                        </div>\
-                    </div>\
-                </div>';
-            }
-
-            return {
-                restrict: "AE",
-                require: "ngModel",
-                replace: true,
-                transclude: true,
-                scope: {
-                    itemShowLabel: "@",
-                    itemShowValue: "@",
-                    placeholder: "@",
-                    class: "@",
-                    style: "@",
-                    inputClass: "@",
-                    ngModel: "=",
-                    fetchDataFunc: "=",
-                    selectData: "=",
-                    hideInputWhenHasData: "=",
-                    panelStyle: "@"
-                },
-                link: function(scope, elem, attr, model) {
-                    scope.multiSelect = true;
-                    scope.showInput = true;
-                    scope.$watch(attr.multiSelect, function(value) {
-                        if (value || value == false) {
-                            scope.multiSelect = value;
-                        }
-                    });
-
-                    function updateNgModel(ngModel) {
-                        if (!ngModel) {
-                            // console.log("Case");
-                            if (scope.multiSelect) {
-                                ngModel = [];
-                            } else {
-                                ngModel = null;
-                            }
-                        }
-                        scope.ngModel = ngModel;
-                        if (scope.multiSelect) {
-                            scope.selectItem = scope.ngModel;
-                        } else {
-                            if (scope.ngModel) {
-                                scope.selectItem = [scope.ngModel];
-                            } else {
-                                scope.selectItem = [];
-                            }
-                        }
-                        // returnResult();
-                        // console.log("NgModel", scope.ngModel);
-                    }
-
-                    function returnResult() {
-                        if (scope.multiSelect) {
-                            scope.ngModel = scope.selectItem;
-                        } else {
-                            scope.ngModel = scope.selectItem[0] || null;
-                        }
-                        console.log("model", scope.ngModel);
-                        if (scope.ngModel) {
-                            model.$setViewValue(scope.ngModel);
-                        }
-                        $rootScope.$broadcast("SEACH_SELECT_CHANGE", scope.ngModel);
-                    }
-
-                    function renderHtml() {
-                        elem.html($compile(render())(scope));
-                        console.log($compile(render())(scope), elem.html());
-                    }
-
-                    $timeout(function() {
-                        updateNgModel(scope.ngModel);
-                    }, 150);
-
-                    scope.$showSelectData = false;
-
-                    var timeout;
-
-                    scope.$changeInputSearch = function(keyword) {
-                        if (timeout) {
-                            $timeout.cancel(timeout);
-                        }
-                        timeout = $timeout(function() {
-                            // console.log("keyword", keyword);
-                            if (scope.fetchDataFunc && keyword) {
-                                scope.fetchDataFunc(keyword);
-                                scope.$showSelectData = true;
-                            } else {
-                                scope.$showSelectData = false;
-                            }
-                        }, 300);
-                    };
-                    scope.$selectItem = function(value, index) {
-                        if (scope.multiSelect) {
-                            if (!scope.$hasExist(value)) {
-                                scope.selectItem.push(value);
-                                // console.log("Model", scope.selectItem);
-                            }
-                        } else {
-                            scope.selectItem = [value];
-                            if (scope.hideInputWhenHasData) {
-                                scope.showInput = false;
-                            }
-                        }
-                        returnResult();
-                    };
-                    scope.$deSelectItem = function(value, index) {
-                        if (scope.multiSelect) {
-                            if (scope.$hasExist(value)) {
-                                scope.selectItem.splice(index, 1);
-                            }
-                        } else {
-                            scope.selectItem = [];
-                        }
-                        scope.showInput = true;
-                        returnResult();
-                    };
-                    scope.$hasExist = function(item) {
-                        var valueArr = scope.selectItem.map(function(i) {
-                            return i[scope.itemShowValue];
-                        });
-                        // console.log("Value arr", valueArr, item);
-                        if (valueArr.indexOf(item[scope.itemShowValue]) > -1) {
-                            return true;
-                        }
-                        return false;
-                    };
-                    scope.$searchInputBlur = function() {
-                        $timeout(function() {
-                            scope.$showSelectData = false;
-                        }, 150);
-                    };
-                    scope.$searchInputFocus = function(keyword) {
-                        scope.$changeInputSearch(keyword);
-                        // if (scope.selectData) {
-                        scope.$showSelectData = true;
-                        // }
-                    };
-                    renderHtml();
-                    $rootScope.$on("UPDATE_NG_MODEL", function(event, data) {
-                        var data = data || scope.ngModel;
-                        if (data) {
-                            if (scope.hideInputWhenHasData) {
-                                scope.showInput = false;
-                            }
-                        }
-                        updateNgModel(data);
-                        renderHtml();
-                    });
-                    $rootScope.$on("RESET_SEARCH_INPUT", function(event, data) {
-                        scope.selectItem = [];
-                        scope.showInput = true;
-                        returnResult();
-                    });
-                }
-            };
-        }]);
-
-})();
 'use strict';
 angular.module('core').factory('Authentication', ['$window', function($window) {
     var auth = {
@@ -587,40 +245,64 @@ angular.module('core').service('Menus', [
     }
 ]);
 
-angular.module('core').factory("Notice", ["$rootScope", function($rootScope) {
+angular.module('core').factory("Notice", ["$rootScope", "$transitions", function($rootScope, $transitions) {
     var queue = [];
     var oldMessage = "";
     var currentMessage = "";
 
-    $rootScope.$on("$stateChangeStart", function() {
+    $transitions.onStart({}, function(trans) {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log("stateChangeStart", currentMessage, queue);
+        // console.log("onStart")
     });
+
+    $transitions.onError({}, function(trans) {
+        queue.push(oldMessage);
+        currentMessage = "";
+        // console.log("onError")
+    });
+
+    // $rootScope.$on("$stateChangeStart", function() {
+    //     console.log("$stateChangeStart");
+    //     oldMessage = currentMessage;
+    //     currentMessage = queue.shift() || "";
+    //     // console.log(currentMessage);
+    // });
 
     $rootScope.$on("requireChange", function() {
         oldMessage = currentMessage;
         currentMessage = queue.shift() || "";
-        // console.log("requireChange", currentMessage, queue);
+        // console.log(currentMessage);
     });
 
-    $rootScope.$on("$stateChangeError", function() {
-        queue.push(oldMessage);
-        currentMessage = "";
-    });
+    // $rootScope.$on("$stateChangeError", function() {
+    //     queue.push(oldMessage);
+    //     currentMessage = "";
+    // });
+
+    function _setNotice(message, type, require) {
+        var require = typeof require !== 'undefined' ? require : false;
+        queue.push({
+            type: type,
+            message: message
+        });
+        if (require) {
+            $rootScope.$broadcast('requireChange');
+            // console.log('requireChange');
+        }
+        // console.log('Queue',queue);
+    }
 
     return {
-        setNotice: function(message, type, require) {
-            var require = typeof require !== 'undefined' ? require : false;
-            queue.push({
-                type: type,
-                message: message
-            });
-            if (require) {
-                $rootScope.$broadcast('requireChange');
-                // console.log('requireChange');
-            }
-            // console.log('Queue',queue);
+        setNotice: _setNotice,
+        error: function(message, require) {
+            _setNotice(message, 'ERROR', require);
+        },
+        success: function(message, require) {
+            _setNotice(message, 'SUCCESS', require);
+        },
+        info: function(message, require) {
+            _setNotice(message, 'INFO', require);
         },
         getNotice: function() {
             return currentMessage;
@@ -638,6 +320,62 @@ angular.module('core').factory("Notice", ["$rootScope", function($rootScope) {
         }
     };
 }]);
+'use strict';
+
+ApplicationConfiguration.registerModule('auth');
+
+angular.module('auth').config(['$stateProvider',
+	function($stateProvider) {
+	}
+]); 
+'use strict';
+
+angular.module('auth').controller('AuthenticationController', ['$scope', '$http', '$location', '$window', 'Authentication', '$cookies',
+    function($scope, $http, $location, $window, Authentication, $cookies) {
+        $scope.authentication = Authentication;
+        $scope.webUrl = $window.settings.services.webUrl;
+
+        $scope.signin = function() {
+            $scope.isSubmit = true;
+            var data = $scope.credentials;
+            data.scope = 'admin';
+            $http.post($window.settings.services.apiUrl + '/api/user/login', data).then(function(response) {
+                if (response.status == 200) {
+                    response = response.data;
+                    if (response.token) {
+                        $window.location.href = '/';
+                    }
+                    $scope.error = response.message;
+                }
+
+            }).catch(function(response) {
+                $scope.error = response.message;
+            });
+        };
+
+        $scope.signout = function() {
+            $http.get($window.settings.services.apiUrl + '/api/user/logout').then(function(response) {
+                if (response.status == 200) {
+                    response = response.data;
+                    $scope.authentication.user = '';
+                    $cookies.remove('token');
+                    $window.location.href = '/';
+                }
+            }).catch(function(response) {
+                $scope.error = response.message;
+            });
+        };
+    }
+]);
+'use strict';
+
+angular.module('auth').factory('Authentication', ['$window', function($window) {
+	var auth = {
+		user: $window.user
+	};
+	return auth;
+}]);
+
 'use strict';
 
 ApplicationConfiguration.registerModule('caches');
@@ -809,62 +547,6 @@ angular.module('caches').factory('Caches', ['$resource',
         });
     }
 ]);
-'use strict';
-
-ApplicationConfiguration.registerModule('auth');
-
-angular.module('auth').config(['$stateProvider',
-	function($stateProvider) {
-	}
-]); 
-'use strict';
-
-angular.module('auth').controller('AuthenticationController', ['$scope', '$http', '$location', '$window', 'Authentication', '$cookies',
-    function($scope, $http, $location, $window, Authentication, $cookies) {
-        $scope.authentication = Authentication;
-        $scope.webUrl = $window.settings.services.webUrl;
-
-        $scope.signin = function() {
-            $scope.isSubmit = true;
-            var data = $scope.credentials;
-            data.scope = 'admin';
-            $http.post($window.settings.services.apiUrl + '/api/user/login', data).then(function(response) {
-                if (response.status == 200) {
-                    response = response.data;
-                    if (response.token) {
-                        $window.location.href = '/';
-                    }
-                    $scope.error = response.message;
-                }
-
-            }).catch(function(response) {
-                $scope.error = response.message;
-            });
-        };
-
-        $scope.signout = function() {
-            $http.get($window.settings.services.apiUrl + '/api/user/logout').then(function(response) {
-                if (response.status == 200) {
-                    response = response.data;
-                    $scope.authentication.user = '';
-                    $cookies.remove('token');
-                    $window.location.href = '/';
-                }
-            }).catch(function(response) {
-                $scope.error = response.message;
-            });
-        };
-    }
-]);
-'use strict';
-
-angular.module('auth').factory('Authentication', ['$window', function($window) {
-	var auth = {
-		user: $window.user
-	};
-	return auth;
-}]);
-
 'use strict';
 
 ApplicationConfiguration.registerModule('categories');
@@ -1181,6 +863,176 @@ angular.module('core').directive('ckEditor', [function () {
 	};
 }]);
 
+'use strict'
+
+angular.module('core').directive('noticeDir', ['Notice', '$rootScope', function(Notice, $rootScope) {
+    var renderNotice = function(message, type) {
+        if (type == Notice.ERROR) {
+            return '<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-exclamation-triangle"></i> Error!</h4><div>' + message + '</div></div>';
+        } else if (type == Notice.INFO) {
+            return '<div class="alert alert-info alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-info"></i> Infomation!</h4><div>' + message + '</div></div>';
+        }
+        return '<div class="alert alert-success alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button><h4><i class="icon fa fa-check"></i> Success!</h4><div>' + message + '</div></div>'
+    };
+
+    return {
+        restrict: "E",
+        template: function(elem, attr) {
+            var notice = Notice.getNotice();
+            // $("html body").click(function() {
+            //     elem.empty();
+            // });
+
+            $rootScope.$on("CLEAR_NOTICE", function() {
+                elem.empty();
+            });
+
+            $rootScope.$on("requireChange", function() {
+                notice = Notice.getNotice();
+                // console.log('directive', notice);
+                if (notice.type == Notice.ERROR) {
+                    elem.html(renderNotice(notice.message, Notice.ERROR));
+                } else if (notice.type == Notice.INFO) {
+                    elem.html(renderNotice(notice.message, Notice.INFO));
+                } else {
+                    elem.html(renderNotice(notice.message, Notice.SUCCESS));
+                }
+            });
+
+            if (notice == "") return;
+            // console.log("Notice:", notice);
+            if (notice.type == Notice.ERROR) {
+                return renderNotice(notice.message, Notice.ERROR);
+            } else if (notice.type == Notice.INFO) {
+                return renderNotice(notice.message, Notice.INFO);
+            }
+            return renderNotice(notice.message, Notice.SUCCESS);
+        }
+    };
+
+}]);
+
+angular.module('core').directive('errorMessage', function() {
+    return {
+        restrict: 'E',
+        template: function(elem, attr) {
+            var requireMsg = attr.requireMsg || "You did not enter a field";
+            var minlengthMsg = attr.minlength ? `You should enter longer than ${attr.minlength - 1} characters` : "You should enter longer in this field";
+            var maxlengthMsg = attr.maxlength ? `You should enter shorter than ${attr.maxlength + 1} characters` : "You should enter shorter in this field";
+            return '<div ng-message="required">' + requireMsg + '</div>' +
+                '<div ng-message="email">You did not enter a email format</div>' +
+                '<div ng-message="pattern">You did not enter a right pattern</div>' +
+                '<div ng-message="number">You did not enter a number</div>' +
+                '<div ng-message="min">You should enter bigger value</div>' +
+                '<div ng-message="max">You should enter smaller value</div>' +
+                '<div ng-message="minlength">' + minlengthMsg + '</div>' +
+                '<div ng-message="maxlength">' + maxlengthMsg + '</div>';
+        }
+    };
+});
+
+angular.module('core')
+    .directive('ngLoading', function() {
+
+        var loadingSpinner = '<div id="preview-area">' +
+            '<div class="spinner">' +
+            '<div class="double-bounce1"></div>' +
+            '<div class="double-bounce2"></div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="mfp-bg bzFromTop mfp-ready"></div>';
+
+        return {
+            restrict: 'AE',
+            link: function(scope, element, attrs) {
+                scope.$watch(attrs.loadingDone, function(val) {
+                    if (val) {
+                        element.html(loadingSpinner);
+                    } else {
+                        element.html('');
+                    }
+                });
+            }
+        };
+    });
+
+angular.module('core')
+    .directive('slugGenerator', ["$timeout", function($timeout) {
+        return {
+            restrict: 'A',
+            scope: {
+                slugGenerator: "=",
+                ngModel: "="
+            },
+            link: function(scope, element, attrs) {
+                var timer;
+                scope.$watch("slugGenerator", function(value) {
+                    if (value) {
+                        $timeout.cancel(timer);
+                        timer = $timeout(function() {
+                            scope.$applyAsync(function() {
+                                scope.ngModel = slug(value, {
+                                    lower: true, // result in lower case 
+                                });
+                            });
+                        }, 150);
+                    } else {
+                        scope.$applyAsync(function() {
+                            scope.ngModel = null;
+                        });
+                    }
+                });
+            }
+        };
+    }]);
+
+// angular.module('core').directive('renderSelect', function($rootScope, $compile, $timeout) {
+//     // var html;
+//     // var renderSlider = function() {
+//     //     return '<select ui-select2 class="form-control" name="roles" data-ng-model="user.roles" id="roles" ng-options="item.value as item.name for item in userRoles" required multiple="multiple" size="2"></select>';
+//     // }
+//     return {
+//         restrict: 'A',
+//         link: function(scope, elem, attr) {
+//             var html = elem.html();
+//             // elem.empty();
+//             scope.$watch(attr.renderSelect, function(value) {
+//                 if (value) {
+//                     $timeout(function() {
+//                         // elem.empty();
+//                         var markup = $compile(html)(scope);
+//                         elem.html(markup);
+//                     });
+//                 }
+//             });
+//         }
+//     }
+// });
+'use strict';
+
+angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
+    function($scope, Authentication, Menus) {
+        $scope.authentication = Authentication;
+        $scope.isCollapsed = false;
+        $scope.menu = Menus.getMenu('topbar');
+    }
+]);
+'use strict';
+
+
+angular.module('core').controller('HomeController', ['$scope', '$location', 'Authentication',
+    function($scope, $location, Authentication) {
+        // This provides Authentication context.
+        $scope.authentication = Authentication;
+
+        $scope.checkAuth = function() {
+            if (!Authentication.user.name) {
+                $location.path('signin');
+            }
+        }
+    }
+]);
+
 'use strict';
 /**
  * Created by chung on 7/23/15.
@@ -1241,6 +1093,231 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
 
     };
 }]);
+(function() {
+    'use strict';
+
+
+
+    angular
+        .module('core')
+        .service('SearchSelectSvc', ["$rootScope", function($rootScope) {
+            return {
+                updateNgModel: function(data) {
+                    $rootScope.$broadcast("UPDATE_NG_MODEL", data);
+                }
+            }
+        }]);
+
+
+    angular
+        .module('core')
+        .directive('searchSelect', ["$compile", "$timeout", "$rootScope", function($compile, $timeout, $rootScope) {
+            // function render() {
+            //     return '\
+
+            // }
+
+            return {
+                restrict: "AE",
+                require: "ngModel",
+                replace: true,
+                transclude: true,
+                scope: {
+                    itemShowLabel: "@",
+                    itemShowValue: "@",
+                    placeholder: "@",
+                    class: "@",
+                    style: "@",
+                    inputClass: "@",
+                    // ngModel: "=",
+                    fetchDataFunc: "=",
+                    selectData: "=",
+                    hideInputWhenHasData: "=",
+                    panelStyle: "@"
+                },
+                templateUrl: '/modules/admin-core/views/js/template/search-select.html',
+                link: function(scope, elem, attr, model) {
+                    var multiSelect = true;
+                    var maxResultItem = 1;
+                    var selectItems = [];
+
+                    scope.showInput = true;
+                    scope.$watch(attr.multiSelect, function(value) {
+                        if (value || value == false) {
+                            multiSelect = value;
+                        }
+                    });
+
+                    scope.$watch('selectData', function(value) {
+                        if (value && value.length) {
+                            scope.resultItems = getResultItems(value);
+                        } else {
+                            scope.resultItems = null;
+                        }
+                    });
+
+                    function getResultItems(data) {
+
+                        var itemCount = 0;
+                        var result = null;
+                        for (var i in data) {
+                            if (!selectItems.includes(data[i][scope.itemShowValue])) {
+                                itemCount++;
+                                if (!result) { result = []; }
+                                result.push(data[i]);
+                            }
+                            if (itemCount >= maxResultItem) {
+                                break;
+                            }
+                        }
+                        return result;
+                    }
+
+                    function updateSelectItems(data) {
+                        selectItems = [];
+                        if (data && data.length) {
+                            for (var i in data) {
+                                selectItems.push(data[i][scope.itemShowValue])
+                            }
+                            scope.selectItem = data;
+                        } else {
+                            scope.selectItem = null;
+                        }
+                    }
+
+                    function updateNgModel(ngModel) {
+                        if (!ngModel) {
+                            // console.log("Case");
+                            if (multiSelect) {
+                                ngModel = [];
+                            } else {
+                                ngModel = null;
+                            }
+                        }
+                        // ngModel = ngModel;
+                        if (multiSelect) {
+                            updateSelectItems(ngModel);
+                        } else {
+                            if (ngModel) {
+                                updateSelectItems([ngModel]);
+                            } else {
+                                updateSelectItems(null);
+                            }
+                        }
+                        // returnResult();
+                        // console.log("NgModel", scope.ngModel);
+                    }
+
+                    function returnResult() {
+                        var ngModel;
+                        if (multiSelect) {
+                            ngModel = scope.selectItem;
+                        } else {
+                            ngModel = scope.selectItem[0] || null;
+                        }
+                        if (ngModel) {
+                            model.$setViewValue(JSON.parse(JSON.stringify(ngModel)));
+                        } else {
+                            model.$setViewValue(null);
+                        }
+                        // $rootScope.$broadcast("SEACH_SELECT_CHANGE", ngModel);
+                    }
+
+                    // function renderHtml() {
+                    //     $(elem).html($compile(render())(scope));
+                    // }
+
+                    $timeout(function() {
+                        updateNgModel(null);
+                    }, 150);
+
+                    scope.$showSelectData = false;
+
+                    var timeout;
+
+                    scope.$changeInputSearch = function(keyword) {
+                        if (timeout) {
+                            $timeout.cancel(timeout);
+                        }
+                        timeout = $timeout(function() {
+                            // console.log("keyword", keyword);
+                            if (scope.fetchDataFunc && keyword) {
+                                scope.fetchDataFunc(keyword);
+                            }
+                            scope.$showSelectData = true;
+                        }, 300);
+                    };
+                    scope.$selectItem = function(value, index) {
+                        if (multiSelect) {
+                            var selectData = scope.selectItem || [];
+                            if (!scope.$hasExist(value)) {
+                                selectData.push(value);
+                                updateSelectItems(selectData);
+                                // console.log("Model", scope.selectItem);
+                            }
+                        } else {
+                            updateSelectItems([value]);
+                            if (scope.hideInputWhenHasData) {
+                                scope.showInput = false;
+                            }
+                        }
+                        returnResult();
+                    };
+                    scope.$deSelectItem = function(value, index) {
+                        if (multiSelect) {
+                            var selectData = scope.selectItem || [];
+                            if (scope.$hasExist(value)) {
+                                selectData.splice(index, 1);
+                                updateSelectItems(selectData);
+                            }
+                        } else {
+                            updateSelectItems(null);
+                        }
+                        scope.showInput = true;
+                        returnResult();
+                    };
+                    scope.$hasExist = function(item) {
+                        // var valueArr = scope.selectItem ? scope.selectItem.map(function(i) {
+                        //     return i[scope.itemShowValue];
+                        // }) : [];
+                        // console.log("Value arr", valueArr, item);
+                        if (selectItems.indexOf(item[scope.itemShowValue]) > -1) {
+                            return true;
+                        }
+                        return false;
+                    };
+                    scope.$searchInputBlur = function() {
+                        $timeout(function() {
+                            scope.$showSelectData = false;
+                        }, 150);
+                    };
+                    scope.$searchInputFocus = function(keyword) {
+                        scope.$changeInputSearch(keyword);
+                        // if (scope.selectData) {
+                        scope.$showSelectData = true;
+                        // }
+                    };
+                    // renderHtml();
+                    $rootScope.$on("UPDATE_NG_MODEL", function(event, data) {
+                        var data = data || scope.ngModel;
+                        if (data) {
+                            if (scope.hideInputWhenHasData) {
+                                scope.showInput = false;
+                            }
+                        }
+                        updateNgModel(data);
+                        // renderHtml();
+                    });
+                    $rootScope.$on("RESET_SEARCH_INPUT", function(event, data) {
+                        updateSelectItems(null);
+                        scope.showInput = true;
+                        returnResult();
+                    });
+                }
+            };
+        }]);
+
+})();
 angular.module('core')
 	.directive('status', function () {
 		return {
@@ -1544,6 +1621,8 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
 
         $scope.tags = {};
 
+        $scope.renderSelect = {};
+
         ///thumb upload
 
         $scope.isUploadImage0 = false;
@@ -1604,7 +1683,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         // Init post
-        $scope.tags = Tags.getList({}, function(result) {});
+        $scope.taglist = Tags.getList({}, function(result) {
+            $scope.renderSelect.tag = true;
+        });
         $scope.users = Users.query({
             role: 'user',
             page: 'all',
@@ -1749,9 +1830,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             $scope.post = Posts.get({
                 postId: $stateParams.postId
             }, function(resp) {
-                Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'post' }, function(result) {
-                    $scope.taglist = result;
-                })
+                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'post' }, function(result) {
+                //     $scope.taglist = result;
+                // })
                 if ($scope.post.thumb) {
                     $scope.review_thumb = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.thumb;
                 }
@@ -1760,7 +1841,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 }
                 if ($scope.post.user) {
                     SearchSelectSvc.updateNgModel($scope.post.user);
-
                 }
             });
         };
@@ -1837,23 +1917,23 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             getListData();
         };
 
-        // change communities
-        $scope.changeCommunity = function(communityId) {
-            Tags.query({
-                communityId: communityId,
-                status: 1,
-                getList: 'true',
-                type: 'post'
-            }, function(result) {
-                $scope.taglist = result;
-            })
-            $scope.users = Users.query({
-                role: 'user',
-                page: 'all',
-                registerCommunity: communityId,
-                status: 1
-            }, function(resp) {});
-        }
+        // // change communities
+        // $scope.changeCommunity = function(communityId) {
+        //     Tags.query({
+        //         communityId: communityId,
+        //         status: 1,
+        //         getList: 'true',
+        //         type: 'post'
+        //     }, function(result) {
+        //         $scope.taglist = result;
+        //     })
+        //     $scope.users = Users.query({
+        //         role: 'user',
+        //         page: 'all',
+        //         registerCommunity: communityId,
+        //         status: 1
+        //     }, function(resp) {});
+        // }
 
         // tag create
         $scope.select2Options = {
@@ -1886,6 +1966,14 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             }, function(data) {
                 $scope.dataSearch = data.items;
             });
+        };
+
+        $scope.changePoster = function() {
+            console.log("xxxx", $scope.user);
+        };
+
+        $scope.posterOptions = {
+
         };
     }
 ]);
@@ -3234,32 +3322,6 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
 
     }
 ]);
-(function() {
-    'use strict';
-
-    angular.module('users').directive('renderSelect', ["$rootScope", "$compile", "$timeout", function($rootScope, $compile, $timeout) {
-        // var html;
-        // var renderSlider = function() {
-        //     return '<select ui-select2 class="form-control" name="roles" data-ng-model="user.roles" id="roles" ng-options="item.value as item.name for item in userRoles" required multiple="multiple" size="2"></select>';
-        // }
-        return {
-            restrict: 'A',
-            link: function(scope, elem, attr) {
-                var html = elem.html();
-                // elem.empty();
-                scope.$watch(attr.renderSelect, function(value) {
-                    if (value) {
-                        $timeout(function() {
-                            // elem.empty();
-                            var markup = $compile(html)(scope);
-                            elem.html(markup);
-                        });
-                    }
-                });
-            }
-        }
-    }]);
-})();
 'use strict';
 
 // Users service used for communicating with the users REST endpoint

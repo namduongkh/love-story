@@ -15,11 +15,10 @@
                     </div>
                     <!-- /.box-header -->
                     <div class="box-body">
-                        <notice-dir/>
+                        <notice-dir></notice-dir>
                         <div class="box-tools">
                             <div class="input-group" style="width: 150px;">
-                                <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search"
-                                />
+                                <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search" />
                                 <div class="input-group-btn">
                                     <button ng-click="filter()" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
                                 </div>
@@ -46,8 +45,7 @@
                         </table>
                         <!-- <ul boundary-links="true" items-per-page="itemsPerPage" max-size="numberVisiblePages" uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm pull-right" previous-text="&lsaquo;" next-text="&rsaquo;"
                             first-text="&laquo;" last-text="&raquo;"></ul> -->
-                        <bd-pagination max-page="10" name="cache_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged"
-                        />
+                        <bd-pagination max-page="10" name="cache_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged" />
                     </div>
                     <!-- /.box-body -->
                 </div>
