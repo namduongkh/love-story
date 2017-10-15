@@ -21,7 +21,7 @@ angular.module('tag').factory('Tags', ['$resource', '$window',
             },
             convertCountTag: {
                 method: "POST",
-                url: $window.settings.services.userApi + "/api/action/convertCountTag",
+                url: $window.settings.services.apiUrl + "/api/action/convertCountTag",
             },
             getList: {
                 method: "GET",

@@ -85,7 +85,7 @@ angular.module('users').factory('Users', ['$resource', '$window',
             },
             updateFavoritesCache: {
                 method: "POST",
-                url: $window.settings.services.userApi + "/api/favorite/update-favorite-cache",
+                url: $window.settings.services.apiUrl + "/api/favorite/update-favorite-cache",
                 payload: {
                     data: '@data'
                 }

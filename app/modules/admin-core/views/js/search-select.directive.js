@@ -38,20 +38,16 @@
                     fetchDataFunc: "=",
                     selectData: "=",
                     hideInputWhenHasData: "=",
-                    panelStyle: "@"
+                    panelStyle: "@",
+                    multiSelect: "=?"
                 },
                 templateUrl: '/modules/admin-core/views/js/template/search-select.html',
                 link: function(scope, elem, attr, model) {
-                    var multiSelect = true;
+                    var multiSelect = scope.multiSelect || true;
                     var maxResultItem = 1;
                     var selectItems = [];
 
                     scope.showInput = true;
-                    scope.$watch(attr.multiSelect, function(value) {
-                        if (value || value == false) {
-                            multiSelect = value;
-                        }
-                    });
 
                     scope.$watch('selectData', function(value) {
                         if (value && value.length) {
@@ -136,26 +132,30 @@
                         updateNgModel(null);
                     }, 150);
 
-                    scope.$showSelectData = false;
+                    scope.showSelectData = false;
 
                     var timeout;
 
-                    scope.$changeInputSearch = function(keyword) {
+                    scope.changeInputSearch = function(keyword) {
                         if (timeout) {
                             $timeout.cancel(timeout);
                         }
                         timeout = $timeout(function() {
-                            // console.log("keyword", keyword);
                             if (scope.fetchDataFunc && keyword) {
                                 scope.fetchDataFunc(keyword);
                             }
-                            scope.$showSelectData = true;
+                            scope.showSelectData = true;
                         }, 300);
                     };
-                    scope.$selectItem = function(value, index) {
+
+                    scope.selectItem = function(value, index) {
+                        console.log({
+                            value,
+                            index
+                        })
                         if (multiSelect) {
                             var selectData = scope.selectItem || [];
-                            if (!scope.$hasExist(value)) {
+                            if (!scope.hasExist(value)) {
                                 selectData.push(value);
                                 updateSelectItems(selectData);
                                 // console.log("Model", scope.selectItem);
@@ -168,10 +168,11 @@
                         }
                         returnResult();
                     };
-                    scope.$deSelectItem = function(value, index) {
+
+                    scope.deSelectItem = function(value, index) {
                         if (multiSelect) {
                             var selectData = scope.selectItem || [];
-                            if (scope.$hasExist(value)) {
+                            if (scope.hasExist(value)) {
                                 selectData.splice(index, 1);
                                 updateSelectItems(selectData);
                             }
@@ -181,7 +182,8 @@
                         scope.showInput = true;
                         returnResult();
                     };
-                    scope.$hasExist = function(item) {
+
+                    scope.hasExist = function(item) {
                         // var valueArr = scope.selectItem ? scope.selectItem.map(function(i) {
                         //     return i[scope.itemShowValue];
                         // }) : [];
@@ -191,17 +193,20 @@
                         }
                         return false;
                     };
-                    scope.$searchInputBlur = function() {
+
+                    scope.searchInputBlur = function() {
                         $timeout(function() {
-                            scope.$showSelectData = false;
+                            scope.showSelectData = false;
                         }, 150);
                     };
-                    scope.$searchInputFocus = function(keyword) {
-                        scope.$changeInputSearch(keyword);
+
+                    scope.searchInputFocus = function(keyword) {
+                        scope.changeInputSearch(keyword);
                         // if (scope.selectData) {
-                        scope.$showSelectData = true;
+                        scope.showSelectData = true;
                         // }
                     };
+
                     // renderHtml();
                     $rootScope.$on("UPDATE_NG_MODEL", function(event, data) {
                         var data = data || scope.ngModel;
@@ -213,6 +218,7 @@
                         updateNgModel(data);
                         // renderHtml();
                     });
+
                     $rootScope.$on("RESET_SEARCH_INPUT", function(event, data) {
                         updateSelectItems(null);
                         scope.showInput = true;

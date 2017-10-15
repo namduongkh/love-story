@@ -5,9 +5,7 @@
 var ApplicationConfiguration = (function() {
     // Init module configuration options
     var applicationModuleName = 'mean';
-    var applicationModuleVendorDependencies = ['ngResource', 'ui.router', 'ngSanitize',
-        'ngMessages', 'ngFileUpload', 'ngCookies', 'LocalStorageModule', 'ui.tinymce'
-    ];
+    var applicationModuleVendorDependencies = ['ngResource', 'ui.router', 'ngSanitize', 'ngMessages', 'ngFileUpload', 'ngCookies', 'LocalStorageModule', 'ui.tinymce', 'ui.select2'];
 
     // Add a new vertical module
     var registerModule = function(moduleName, dependencies) {
@@ -339,31 +337,34 @@ angular.module('auth').controller('AuthenticationController', ['$scope', '$http'
             $scope.isSubmit = true;
             var data = $scope.credentials;
             data.scope = 'admin';
-            $http.post($window.settings.services.apiUrl + '/api/user/login', data).then(function(response) {
-                if (response.status == 200) {
-                    response = response.data;
-                    if (response.token) {
-                        $window.location.href = '/';
+            $http.post($window.settings.services.apiUrl + '/api/user/login', data)
+                .then(function(response) {
+                    if (response.status == 200) {
+                        response = response.data;
+                        if (response.token) {
+                            $window.location.href = '/';
+                        }
+                        $scope.error = response.message;
                     }
-                    $scope.error = response.message;
-                }
-
-            }).catch(function(response) {
-                $scope.error = response.message;
-            });
+                })
+                .catch(function(response) {
+                    $scope.error = response.data.message;
+                });
         };
 
         $scope.signout = function() {
-            $http.get($window.settings.services.apiUrl + '/api/user/logout').then(function(response) {
-                if (response.status == 200) {
-                    response = response.data;
-                    $scope.authentication.user = '';
-                    $cookies.remove('token');
-                    $window.location.href = '/';
-                }
-            }).catch(function(response) {
-                $scope.error = response.message;
-            });
+            $http.get($window.settings.services.apiUrl + '/api/user/logout')
+                .then(function(response) {
+                    if (response.status == 200) {
+                        response = response.data;
+                        $scope.authentication.user = '';
+                        $cookies.remove('token');
+                        $window.location.href = '/';
+                    }
+                })
+                .catch(function(response) {
+                    $scope.error = response.data.message;
+                });
         };
     }
 ]);
@@ -1008,6 +1009,57 @@ angular.module('core')
 //         }
 //     }
 // });
+
+angular.module('core')
+    .directive('handleSelectMultiple', function() {
+        return {
+            restrict: 'A',
+            scope: {
+                // handleList: '@', // in view add attribute normal-variable="<$scope.normal['define in controller']>"
+                handleList: '=', // in view add attribute object-variable="<$scope.object['define in controller']>"
+                // functionVariable: '&', // in view add attribute function-variable="<$scope.function['define in controller']>"
+            },
+            require: 'ngModel',
+            link: function(scope, element, attrs, ngModel) {
+                // element.on('select2:select',function(e) {
+                //     console.log('select2:select: ', e);
+                //     console.log('Value: ', element.val());
+                // });
+
+                function updateView(value) {
+                    // ngModel.$viewValue = value;
+                    ngModel.$render();
+                }
+
+                function pushValue(value) {
+                    ngModel.$modelValue.push(value);
+                    // scope.ngModel = value; // overwrites ngModel value
+                }
+
+                element.on('change', function(e) {
+                    // console.log('change: ', e);
+                    // console.log(attrs, scope.handleList);
+                    // console.log('Value: ', element.val()[0]);
+
+                    var value = element.val();
+
+                    for (var i = 0; i < value.length; i++) {
+                        value[i].split(':').length == 2 ?
+                            value[i] = value[i].split(':')[1] : value[i] = value[i].split(':')[0]
+
+                        // console.log(value[i]);
+
+                        if (ngModel.$modelValue.indexOf(value[i]) == -1) {
+                            pushValue(value[i]);
+                            updateView(value[i]);
+                        }
+                    }
+
+                    // console.log('ngModel', ngModel.$modelValue);
+                });
+            }
+        }
+    });
 'use strict';
 
 angular.module('core').controller('HeaderController', ['$scope', 'Authentication', 'Menus',
@@ -1047,7 +1099,7 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
 
     var yesno = [{ name: "Yes", value: 1 }, { 'name': "No", value: 0 }];
 
-    var roles = [{ name: 'Admin', value: 'admin' }, { name: 'User', value: 'user' }];
+    var roles = [{ name: "Admin", value: 'admin' }, { 'name': "User", value: 'user' }];
 
     var genders = [{ name: 'male', value: 'male' }, { name: 'female', value: 'female' }];
 
@@ -1133,20 +1185,16 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                     fetchDataFunc: "=",
                     selectData: "=",
                     hideInputWhenHasData: "=",
-                    panelStyle: "@"
+                    panelStyle: "@",
+                    multiSelect: "=?"
                 },
                 templateUrl: '/modules/admin-core/views/js/template/search-select.html',
                 link: function(scope, elem, attr, model) {
-                    var multiSelect = true;
+                    var multiSelect = scope.multiSelect || true;
                     var maxResultItem = 1;
                     var selectItems = [];
 
                     scope.showInput = true;
-                    scope.$watch(attr.multiSelect, function(value) {
-                        if (value || value == false) {
-                            multiSelect = value;
-                        }
-                    });
 
                     scope.$watch('selectData', function(value) {
                         if (value && value.length) {
@@ -1231,26 +1279,30 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                         updateNgModel(null);
                     }, 150);
 
-                    scope.$showSelectData = false;
+                    scope.showSelectData = false;
 
                     var timeout;
 
-                    scope.$changeInputSearch = function(keyword) {
+                    scope.changeInputSearch = function(keyword) {
                         if (timeout) {
                             $timeout.cancel(timeout);
                         }
                         timeout = $timeout(function() {
-                            // console.log("keyword", keyword);
                             if (scope.fetchDataFunc && keyword) {
                                 scope.fetchDataFunc(keyword);
                             }
-                            scope.$showSelectData = true;
+                            scope.showSelectData = true;
                         }, 300);
                     };
-                    scope.$selectItem = function(value, index) {
+
+                    scope.selectItem = function(value, index) {
+                        console.log({
+                            value,
+                            index
+                        })
                         if (multiSelect) {
                             var selectData = scope.selectItem || [];
-                            if (!scope.$hasExist(value)) {
+                            if (!scope.hasExist(value)) {
                                 selectData.push(value);
                                 updateSelectItems(selectData);
                                 // console.log("Model", scope.selectItem);
@@ -1263,10 +1315,11 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                         }
                         returnResult();
                     };
-                    scope.$deSelectItem = function(value, index) {
+
+                    scope.deSelectItem = function(value, index) {
                         if (multiSelect) {
                             var selectData = scope.selectItem || [];
-                            if (scope.$hasExist(value)) {
+                            if (scope.hasExist(value)) {
                                 selectData.splice(index, 1);
                                 updateSelectItems(selectData);
                             }
@@ -1276,7 +1329,8 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                         scope.showInput = true;
                         returnResult();
                     };
-                    scope.$hasExist = function(item) {
+
+                    scope.hasExist = function(item) {
                         // var valueArr = scope.selectItem ? scope.selectItem.map(function(i) {
                         //     return i[scope.itemShowValue];
                         // }) : [];
@@ -1286,17 +1340,20 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                         }
                         return false;
                     };
-                    scope.$searchInputBlur = function() {
+
+                    scope.searchInputBlur = function() {
                         $timeout(function() {
-                            scope.$showSelectData = false;
+                            scope.showSelectData = false;
                         }, 150);
                     };
-                    scope.$searchInputFocus = function(keyword) {
-                        scope.$changeInputSearch(keyword);
+
+                    scope.searchInputFocus = function(keyword) {
+                        scope.changeInputSearch(keyword);
                         // if (scope.selectData) {
-                        scope.$showSelectData = true;
+                        scope.showSelectData = true;
                         // }
                     };
+
                     // renderHtml();
                     $rootScope.$on("UPDATE_NG_MODEL", function(event, data) {
                         var data = data || scope.ngModel;
@@ -1308,6 +1365,7 @@ angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
                         updateNgModel(data);
                         // renderHtml();
                     });
+
                     $rootScope.$on("RESET_SEARCH_INPUT", function(event, data) {
                         updateSelectItems(null);
                         scope.showInput = true;
@@ -1575,30 +1633,30 @@ ApplicationConfiguration.registerModule('posts');
 angular.module('posts').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Chia sẻ & thảo luận', 'posts', 'dropdown', '/posts(/create)?');
-        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách bài viết', 'posts');
-        // Menus.addSubMenuItem('topbar', 'posts', 'New Post', 'posts/create');
+        Menus.addMenuItem('topbar', 'Bài đăng', 'posts', 'dropdown', '/posts(/create)?');
+        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách bài đăng', 'posts');
+        Menus.addSubMenuItem('topbar', 'posts', 'Bài đăng mới', 'posts/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {
         // posts state routing
-        $stateProvider.
-        state('listPosts', {
-            url: '/posts',
-            templateUrl: '/modules/admin-post/views/list-posts.client.view.html'
-        }).
-        state('createPost', {
-            url: '/posts/create',
-            templateUrl: '/modules/admin-post/views/create-post.client.view.html'
-        }).
-        state('viewPost', {
-            url: '/posts/:postId',
-            templateUrl: '/modules/admin-post/views/view-post.client.view.html'
-        }).
-        state('editPost', {
-            url: '/posts/:postId/edit',
-            templateUrl: '/modules/admin-post/views/edit-post.client.view.html'
-        });
+        $stateProvider
+            .state('listPosts', {
+                url: '/posts',
+                templateUrl: '/modules/admin-post/views/list-posts.client.view.html'
+            })
+            .state('createPost', {
+                url: '/posts/create',
+                templateUrl: '/modules/admin-post/views/create-post.client.view.html'
+            })
+            // .state('viewPost', {
+            //     url: '/posts/:postId',
+            //     templateUrl: '/modules/admin-post/views/view-post.client.view.html'
+            // })
+            .state('editPost', {
+                url: '/posts/:postId/edit',
+                templateUrl: '/modules/admin-post/views/edit-post.client.view.html'
+            });
     }
 ]);
 'use strict';
@@ -1610,20 +1668,20 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         if (!Authentication.user.name) {
             $location.path('signin');
         }
+
         $scope.uploadApi = $window.settings.services.uploadApi;
+
         $scope.webUrl = $window.settings.services.webUrl;
 
         $scope.statuses = Option.getStatus();
 
-        $scope.features = Option.getFeatures();
+        // $scope.features = Option.getFeaturePost();
 
         $scope.authentication = Authentication;
 
+        $scope.communities = {};
+
         $scope.tags = {};
-
-        $scope.renderSelect = {};
-
-        ///thumb upload
 
         $scope.isUploadImage0 = false;
 
@@ -1676,6 +1734,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                     .then(resp => {
                         if (resp.status == 200) {
                             var path = $scope.webUrl + $scope.postsPath + resp.data.location;
+                            console.log({ path });
                             success(path);
                         }
                     })
@@ -1683,18 +1742,12 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         // Init post
-        $scope.taglist = Tags.getList({}, function(result) {
-            $scope.renderSelect.tag = true;
-        });
+        $scope.tags = Tags.getList({}, function(result) {});
         $scope.users = Users.query({
             role: 'user',
             page: 'all',
             status: 1
         }, function(resp) {});
-
-        $scope.isUploadImage = false;
-
-        $scope.isInvalidFile = false;
 
         $scope.gotoList = function() {
             $location.path('posts');
@@ -1803,9 +1856,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             delete post.__v;
             post.$update(function(resp) {
                 //$location.path('posts/' + post._id);
-                var data = {
-                    id: resp._id
-                }
+                var data = { id: resp._id }
                 PostSvc.getImageFromContent(data).then(result => {
                     if (resp.error) {
                         Notice.setNotice(resp.message, 'ERROR', true);
@@ -1839,9 +1890,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 if ($scope.post.image) {
                     $scope.review_image = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.image;
                 }
-                if ($scope.post.user) {
-                    SearchSelectSvc.updateNgModel($scope.post.user);
-                }
+                // if ($scope.post.user) {
+                //     SearchSelectSvc.updateNgModel($scope.post.user);
+                // }
             });
         };
 
@@ -1908,32 +1959,10 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
         //reset
         $scope.reset = function() {
-            $scope.search.keyword = "";
-            $scope.search.category = "";
-            $scope.search.status = "";
-            $scope.search.feature = "";
             $scope.search = {};
             $scope.currentPage = 1;
             getListData();
         };
-
-        // // change communities
-        // $scope.changeCommunity = function(communityId) {
-        //     Tags.query({
-        //         communityId: communityId,
-        //         status: 1,
-        //         getList: 'true',
-        //         type: 'post'
-        //     }, function(result) {
-        //         $scope.taglist = result;
-        //     })
-        //     $scope.users = Users.query({
-        //         role: 'user',
-        //         page: 'all',
-        //         registerCommunity: communityId,
-        //         status: 1
-        //     }, function(resp) {});
-        // }
 
         // tag create
         $scope.select2Options = {
@@ -1967,14 +1996,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 $scope.dataSearch = data.items;
             });
         };
-
-        $scope.changePoster = function() {
-            console.log("xxxx", $scope.user);
-        };
-
-        $scope.posterOptions = {
-
-        };
     }
 ]);
 'use strict';
@@ -1995,16 +2016,16 @@ angular.module('posts').factory('Posts', ['$resource',
     }
 ]);
 angular.module('posts')
-.service("PostSvc", ["$window", "$http", function($window, $http) {
-    return {
-        uploadPostContentImage: function(data) {
-            return $http.post($window.settings.services.userApi + '/api/upload/uploadPostContentImage', data);
-        },
-        getImageFromContent: function(data) {
-            return $http.post($window.settings.services.userApi + '/api/post/getImageFromContent', data);
+    .service("PostSvc", ["$window", "$http", function($window, $http) {
+        return {
+            uploadPostContentImage: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/upload/uploadPostContentImage', data);
+            },
+            getImageFromContent: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/post/getImageFromContent', data);
+            }
         }
-    }
-}])
+    }]);
 'use strict';
 
 ApplicationConfiguration.registerModule('tag');
@@ -2012,9 +2033,9 @@ ApplicationConfiguration.registerModule('tag');
 angular.module('tag').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Tags', 'tag', 'dropdown', '/tags(/create)?');
-        Menus.addSubMenuItem('topbar', 'tag', 'List Tags', 'tags');
-        Menus.addSubMenuItem('topbar', 'tag', 'New Tag', 'tags/create');
+        Menus.addMenuItem('topbar', 'Nhãn', 'tag', 'dropdown', '/tags(/create)?');
+        Menus.addSubMenuItem('topbar', 'tag', 'Danh sách', 'tags');
+        Menus.addSubMenuItem('topbar', 'tag', 'Nhãn mới', 'tags/create');
         // Menus.addSubMenuItem('topbar', 'tag', 'Update Count', 'tags/update-count');
     }
 ]).config(['$stateProvider',
@@ -2358,7 +2379,7 @@ angular.module('tag').factory('Tags', ['$resource', '$window',
             },
             convertCountTag: {
                 method: "POST",
-                url: $window.settings.services.userApi + "/api/action/convertCountTag",
+                url: $window.settings.services.apiUrl + "/api/action/convertCountTag",
             },
             getList: {
                 method: "GET",
@@ -2753,7 +2774,7 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
                             }
                             Users.updateFavoritesCache({ user_data });
                         });
-                        var consol = bzResourceSvc.api($window.settings.services.userApi + '/api/upload/image-avatar').upload({}, fd, function(respon) {
+                        var consol = bzResourceSvc.api($window.settings.services.apiUrl + '/api/upload/image-avatar').upload({}, fd, function(respon) {
                             $scope.isLoading = false;
                             Notice.setNotice("Update user success!", 'SUCCESS');
                             if (type == 'save&list') {
@@ -2808,7 +2829,9 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
             $scope.user = Users.get({
                 userId: $stateParams.userId
             });
-            $scope.user.$promise.then(function(result) {});
+            $scope.user.$promise.then(function(result) {
+                console.log({ result });
+            });
         };
 
         $scope.findOneAndHistory = function() {
@@ -3273,11 +3296,6 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
             return false
         };
 
-        // Add seller type
-        $scope.changeUserRoles = function(data) {
-            $scope.hasChangeSeller = data.indexOf('seller') == -1 ? false : true;
-        };
-
         //Pending seller status
         $scope.pendingSellerStatus = function(pendingStatus) {
             if (pendingStatus == true) {
@@ -3409,7 +3427,7 @@ angular.module('users').factory('Users', ['$resource', '$window',
             },
             updateFavoritesCache: {
                 method: "POST",
-                url: $window.settings.services.userApi + "/api/favorite/update-favorite-cache",
+                url: $window.settings.services.apiUrl + "/api/favorite/update-favorite-cache",
                 payload: {
                     data: '@data'
                 }

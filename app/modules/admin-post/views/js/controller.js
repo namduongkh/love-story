@@ -7,20 +7,20 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         if (!Authentication.user.name) {
             $location.path('signin');
         }
+
         $scope.uploadApi = $window.settings.services.uploadApi;
+
         $scope.webUrl = $window.settings.services.webUrl;
 
         $scope.statuses = Option.getStatus();
 
-        $scope.features = Option.getFeatures();
+        // $scope.features = Option.getFeaturePost();
 
         $scope.authentication = Authentication;
 
+        $scope.communities = {};
+
         $scope.tags = {};
-
-        $scope.renderSelect = {};
-
-        ///thumb upload
 
         $scope.isUploadImage0 = false;
 
@@ -73,6 +73,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                     .then(resp => {
                         if (resp.status == 200) {
                             var path = $scope.webUrl + $scope.postsPath + resp.data.location;
+                            console.log({ path });
                             success(path);
                         }
                     })
@@ -80,18 +81,12 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         // Init post
-        $scope.taglist = Tags.getList({}, function(result) {
-            $scope.renderSelect.tag = true;
-        });
+        $scope.tags = Tags.getList({}, function(result) {});
         $scope.users = Users.query({
             role: 'user',
             page: 'all',
             status: 1
         }, function(resp) {});
-
-        $scope.isUploadImage = false;
-
-        $scope.isInvalidFile = false;
 
         $scope.gotoList = function() {
             $location.path('posts');
@@ -200,9 +195,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             delete post.__v;
             post.$update(function(resp) {
                 //$location.path('posts/' + post._id);
-                var data = {
-                    id: resp._id
-                }
+                var data = { id: resp._id }
                 PostSvc.getImageFromContent(data).then(result => {
                     if (resp.error) {
                         Notice.setNotice(resp.message, 'ERROR', true);
@@ -236,9 +229,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 if ($scope.post.image) {
                     $scope.review_image = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.image;
                 }
-                if ($scope.post.user) {
-                    SearchSelectSvc.updateNgModel($scope.post.user);
-                }
+                // if ($scope.post.user) {
+                //     SearchSelectSvc.updateNgModel($scope.post.user);
+                // }
             });
         };
 
@@ -305,32 +298,10 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
         //reset
         $scope.reset = function() {
-            $scope.search.keyword = "";
-            $scope.search.category = "";
-            $scope.search.status = "";
-            $scope.search.feature = "";
             $scope.search = {};
             $scope.currentPage = 1;
             getListData();
         };
-
-        // // change communities
-        // $scope.changeCommunity = function(communityId) {
-        //     Tags.query({
-        //         communityId: communityId,
-        //         status: 1,
-        //         getList: 'true',
-        //         type: 'post'
-        //     }, function(result) {
-        //         $scope.taglist = result;
-        //     })
-        //     $scope.users = Users.query({
-        //         role: 'user',
-        //         page: 'all',
-        //         registerCommunity: communityId,
-        //         status: 1
-        //     }, function(resp) {});
-        // }
 
         // tag create
         $scope.select2Options = {
@@ -363,14 +334,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             }, function(data) {
                 $scope.dataSearch = data.items;
             });
-        };
-
-        $scope.changePoster = function() {
-            console.log("xxxx", $scope.user);
-        };
-
-        $scope.posterOptions = {
-
         };
     }
 ]);

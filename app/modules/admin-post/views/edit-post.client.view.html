@@ -6,21 +6,19 @@
     <section class="content">
         <form name="PostForm" novalidate>
             <div class="row">
-                <div class="col-md-12">
-                    <div class="box box-primary">
-                        <div class="box-body">
-                            <div class="form-group">
-                                <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
+                <div class="callout">
+                    <div class="box-footer">
+                        <div class="form-group">
+                            <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
                         &nbsp;&nbsp; -->
-                                <a class="btn btn-primary" ng-click="update(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
-                                <a class="btn btn-primary" ng-click="update(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
-                                <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()"> &nbsp;&nbsp;
-                                <input type="button" value="Delete" class="btn btn-danger" ng-click="remove(post._id)">
-                            </div>
-
-                            <notice-dir></notice-dir>
-
+                            <a class="btn btn-primary" ng-click="update(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
+                            <a class="btn btn-primary" ng-click="update(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
+                            <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()"> &nbsp;&nbsp;
+                            <input type="button" value="Delete" class="btn btn-danger" ng-click="remove(post._id)">
                         </div>
+
+                        <notice-dir/>
+
                     </div>
                 </div>
                 <div class="col-md-8">
@@ -44,15 +42,6 @@
                                     <input type="text" data-ng-model="post.slug" id="slug" class="form-control" placeholder="Slug">
                                 </div>
                             </div>
-                            <!--<div class="form-group">
-                                <label class="control-label" for="teaser">Teaser</label>
-                                <div class="controls">
-                                    <textarea class="form-control" name="teaser" data-ng-model="post.teaser" rows="3"></textarea>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.teaser.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message/>
-                                </div>
-                            </div>-->
                             <div class="form-group">
                                 <label class="control-label" for="thumb">Thumb</label>
                                 <div class="controls">
@@ -83,15 +72,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--
-							<div class="form-group">
-								<label class="control-label" for="image">Image</label>
-								<div class="controls">
-									<input type="text" data-ng-model="post.image" id="image" class="form-control"
-										   placeholder="">
-								</div>
-							</div>
--->
                             <div class="form-group">
                                 <label class="control-label" for="content">Content</label>
                                 <div class="controls">
@@ -108,16 +88,6 @@
                     <div class="box box-default">
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="community">Community</label>
-                                <div class="controls">
-                                    <select class="form-control" data-ng-model="post.communityId" id="community" name="community" ng-options="community._id as community.title for community in communities.items" data-placeholder="Select community" required ng-change="changeCommunity(post.communityId)">
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.community.$error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-message="required">You did not select a field</div>
-                                </div>
-                            </div>
-                            <div class="form-group">
                                 <label class="control-label" for="categories">Categories</label>
                                 <div class="controls">
                                     <select ui-select2 class="form-control" name="category" data-ng-model="post.category" id="category" ng-options="category._id as category.name for category in categories.items" required>
@@ -130,44 +100,22 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="tags">Tags</label>
-                                <div class="controls" render-select="renderSelect.tag">
-                                    <select ui-select2="select2Options" handle-select-mutiple handle-list="taglist.items" handle-text="name" handle-value="_id" class="form-control" data-ng-model="post.tags" id="tag" name="tag" ng-options="tag._id as tag.name for tag in taglist.items" data-placeholder="Select tags"
-                                        multiple="multiple" required>
+                                <div class="controls" render-select="render_select">
+                                    <select ui-select2="select2Options" handle-select-multiple handle-list="tags.items" class="form-control" data-ng-model="post.tags" id="tag" name="tag" ng-options="tag._id as tag.name for tag in tags.items" data-placeholder="Chọn tags" multiple="multiple"
+                                        required>
                                     </select>
                                 </div>
                                 <div class="error-messages message" ng-messages="PostForm.tag.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message require-msg="You did not select a field" />
                                 </div>
                             </div>
-                            <!-- <div class="form-group">
-                                <label class="control-label" for="user">Poster</label>
-                                <div class="controls">
-                                    <select ui-select2 class="form-control" data-ng-model="post.user" id="user" name="user" ng-options="user._id as user.name for user in users.items" required>
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-message="required">You did not select a field</div>
-                                </div>
-                            </div> -->
                             <div class="form-group">
                                 <label class="control-label" for="user">Poster</label>
-                                <div class="controls" input-class="form-control" id="user" search-select multi-select="false" ng-model="post.user" select-data="dataSearch" item-show-label="name" item-show-value="_id" fetch-data-func="fetchDataSearch" required placeholder="Select poster"></div>
+                                <select ui-select2 class="form-control" data-ng-model="post.user" id="user" name="user" ng-options="user._id as user.name for user in users.items" data-placeholder="Chọn user" required>
+                                </select>
                                 <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
                                 </div>
-                                <div class="error-messages message" ng-if="submitted && userError" ng-bind="userError">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="status">Feature</label>
-                                <div class="controls">
-                                    <select class="form-control highlight_select" name="feature" data-ng-model="post.feature" id="feature" ng-options="item.value as item.name for item in features" required>
-                                    </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.feature.$error" ng-messages-multiple ng-if="submitted">
-                                    <error-message require-msg="You did not select a field" />
-                                </div>
-
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="status">Status</label>

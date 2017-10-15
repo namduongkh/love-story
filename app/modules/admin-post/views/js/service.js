@@ -16,13 +16,13 @@ angular.module('posts').factory('Posts', ['$resource',
     }
 ]);
 angular.module('posts')
-.service("PostSvc", function($window, $http) {
-    return {
-        uploadPostContentImage: function(data) {
-            return $http.post($window.settings.services.userApi + '/api/upload/uploadPostContentImage', data);
-        },
-        getImageFromContent: function(data) {
-            return $http.post($window.settings.services.userApi + '/api/post/getImageFromContent', data);
+    .service("PostSvc", function($window, $http) {
+        return {
+            uploadPostContentImage: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/upload/uploadPostContentImage', data);
+            },
+            getImageFromContent: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/post/getImageFromContent', data);
+            }
         }
-    }
-})
+    });

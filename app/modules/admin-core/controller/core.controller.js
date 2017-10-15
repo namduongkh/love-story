@@ -94,9 +94,8 @@ exports.handleError = function(request, reply) {
         // }
         // console.log("admin");
         return reply.redirect(loginUrl);
+        // return reply.continue();
     } else {
         return reply.continue();
     }
-
-
 };

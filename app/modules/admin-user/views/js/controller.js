@@ -319,7 +319,7 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
                             }
                             Users.updateFavoritesCache({ user_data });
                         });
-                        var consol = bzResourceSvc.api($window.settings.services.userApi + '/api/upload/image-avatar').upload({}, fd, function(respon) {
+                        var consol = bzResourceSvc.api($window.settings.services.apiUrl + '/api/upload/image-avatar').upload({}, fd, function(respon) {
                             $scope.isLoading = false;
                             Notice.setNotice("Update user success!", 'SUCCESS');
                             if (type == 'save&list') {
@@ -374,7 +374,9 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
             $scope.user = Users.get({
                 userId: $stateParams.userId
             });
-            $scope.user.$promise.then(function(result) {});
+            $scope.user.$promise.then(function(result) {
+                console.log({ result });
+            });
         };
 
         $scope.findOneAndHistory = function() {
@@ -837,11 +839,6 @@ angular.module('users').controller('UsersController', ['SendNotify', '$rootScope
                 return 'required';
             }
             return false
-        };
-
-        // Add seller type
-        $scope.changeUserRoles = function(data) {
-            $scope.hasChangeSeller = data.indexOf('seller') == -1 ? false : true;
         };
 
         //Pending seller status

@@ -80,9 +80,9 @@
                         <div class="box-body">
                             <div class="form-group">
                                 <label class="control-label" for="roles">Role</label>
-                                <div class="controls" render-select="render_select">
-                                    <select ui-select2 class="form-control" name="roles" data-ng-model="user.roles" id="roles" ng-options="item.value as item.name for item in userRoles" required multiple="multiple" size="2" ng-change="changeUserRoles(user.roles)">
-                                </select>
+                                <div class="controls">
+                                    <select ui-select2 class="form-control" name="roles" data-ng-model="user.roles" id="roles" ng-options="item.value as item.name for item in userRoles" required multiple="multiple" size="2">
+                                    </select>
                                 </div>
                                 <div class="error-messages message" ng-messages="UserForm.roles.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message require-msg="You did not select a field" />

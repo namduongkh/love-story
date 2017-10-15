@@ -18,24 +18,16 @@ exports.getAll = {
         let itemsPerPage = config.get('web.paging.itemsPerPage');
         let numberVisiblePages = config.get('web.paging.numberVisiblePages');
         let {
-            communityId,
             status,
             category,
-            feature,
             tags
         } = request.payload || request.query;
         let options = {};
-        if (communityId) {
-            options.communityId = communityId;
-        }
         if (status) {
             options.status = parseInt(status);
         }
         if (category) {
             options.category = category;
-        }
-        if (feature) {
-            options.feature = parseInt(feature);
         }
         if (tags) {
             options.tags = tags;
@@ -45,18 +37,20 @@ exports.getAll = {
             options.title = re;
         }
 
-        Post.find(options).populate('category').populate('communityId').lean().sort('-created').paginate(page, itemsPerPage, function(err, items, total) {
-            if (err) {
-                request.log(['error', 'list', 'post'], err);
-                reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
-            }
-            let totalPage = Math.ceil(total / itemsPerPage);
-            let dataRes = { status: 1, totalItems: total, totalPage: totalPage, currentPage: page, itemsPerPage: itemsPerPage, numberVisiblePages: numberVisiblePages, items: items };
-            reply(dataRes);
-        });
-
+        Post.find(options)
+            .populate('category')
+            .populate('user', 'name is_seed').lean().sort('-created').paginate(page, itemsPerPage, function(err, items, total) {
+                if (err) {
+                    request.log(['error', 'list', 'post'], err);
+                    console.log("err", err);
+                    return reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
+                }
+                let totalPage = Math.ceil(total / itemsPerPage);
+                let dataRes = { status: 1, totalItems: total, totalPage: totalPage, currentPage: page, itemsPerPage: itemsPerPage, numberVisiblePages: numberVisiblePages, items: items };
+                return reply(dataRes);
+            });
     }
-}
+};
 
 exports.edit = {
     pre: [
@@ -125,7 +119,6 @@ exports.save = {
             thumb: Joi.any().description('Thumms'),
             image: Joi.any().description('Image'),
             attrs: Joi.any().description('Meta'),
-            communityId: Joi.any().description('Community Id'),
             tags: Joi.any().description('Tags'),
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
@@ -194,7 +187,6 @@ exports.update = {
             thumb: Joi.any().description('Thumms'),
             image: Joi.any().description('Image'),
             attrs: Joi.any().description('Meta'),
-            communityId: Joi.any().description('Community Id'),
             tags: Joi.any().description('Tags'),
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
@@ -224,9 +216,9 @@ exports.delete = {
 function getById(request, reply) {
     const id = request.params.id || request.payload.id;
     let promise = Post.findOne({
-            '_id': id
-        })
-        .populate("user", "_id name");
+        '_id': id
+    });
+    // .populate("user", "_id name");
     promise.then(function(post) {
         reply(post);
     }).catch(function(err) {
@@ -288,7 +280,6 @@ function checkSlug(request, reply) {
 function checkAndCreateIfNewTag(request, reply) {
     let {
         tags,
-        communityId
     } = request.payload || request.params;
     var tmpTags = [];
     if (tags) {
@@ -307,8 +298,6 @@ function checkAndCreateIfNewTag(request, reply) {
                     let tag = new Tag({
                         name: item,
                         slug: slug,
-                        communityId: communityId,
-                        type: 'post'
                     });
 
                     let promise = tag.save();
@@ -335,7 +324,6 @@ function makeNewTagSlug(name, callback, count) {
     let slug = Slug(name).toLowerCase();
     let promise = Tag.find({
         slug: slug,
-        type: 'post'
     });
 
     promise.then(function(result) {

@@ -5,9 +5,9 @@ ApplicationConfiguration.registerModule('tag');
 angular.module('tag').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Tags', 'tag', 'dropdown', '/tags(/create)?');
-        Menus.addSubMenuItem('topbar', 'tag', 'List Tags', 'tags');
-        Menus.addSubMenuItem('topbar', 'tag', 'New Tag', 'tags/create');
+        Menus.addMenuItem('topbar', 'Nhãn', 'tag', 'dropdown', '/tags(/create)?');
+        Menus.addSubMenuItem('topbar', 'tag', 'Danh sách', 'tags');
+        Menus.addSubMenuItem('topbar', 'tag', 'Nhãn mới', 'tags/create');
         // Menus.addSubMenuItem('topbar', 'tag', 'Update Count', 'tags/update-count');
     }
 ]).config(['$stateProvider',

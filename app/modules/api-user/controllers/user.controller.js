@@ -20,7 +20,6 @@ exports.login = {
                 // console.log("user", user);
                 user.authenticate(password, function(err, result) {
                     if (err || !result) {
-                        request.log(['error', 'login'], err);
                         return reply(Boom.unauthorized("Đăng nhập không hợp lệ"));
                     }
                     if (result) {

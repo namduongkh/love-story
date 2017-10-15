@@ -18,12 +18,6 @@
                         <notice-dir></notice-dir>
 
                         <div class="box-tools">
-                            <!--<div class="input-group" style="width: 150px;">
-                                    <input type="text" name="query" data-ng-model="search.keyword" class="form-control input-sm pull-right" placeholder="Search" />
-                                    <div class="input-group-btn">
-                                        <button ng-click="filter()" class="btn btn-sm btn-default"><i class="fa fa-search"></i></button>
-                                    </div>
-                                </div>-->
                             <div class="col-md-12">
                                 <div class="row">
                                     <div class="form-inline filter-layout">
@@ -34,30 +28,21 @@
                                         <div class="form-group">
                                             <label class="control-label" for="category">Categories</label>
                                             <select class="form-control" ng-change="filter()" data-ng-model="search.category" id="category" ng-options="category._id as category.name for category in categories.items">
-                                                        <option value="">-- All category --</option>
-                                                        </select>
+                                                <option value="">-- All category --</option>
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label" for="tags">Tags</label>
                                             <select style="width: 150px;" ui-select2 class="form-control" ng-change="filter()" data-ng-model="search.tags" id="category" ng-options="item._id as item.name for item in tags.items">
-                                                        <option value="">-- All tag --</option>
-                                                        </select>
+                                                <option value="">-- All tag --</option>
+                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label" for="status">Status</label>
                                             <select class="form-control" ng-change="filter()" data-ng-model="search.status" id="status" ng-options="item.value as item.name for item in statuses">
-                                                    <option value="">-- All status --</option>
-                                                    </select>
+                                                <option value="">-- All status --</option>
+                                            </select>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label class="control-label" for="feature">Feature</label>
-                                            <select class="form-control" ng-change="filter()" data-ng-model="search.feature" id="feature" ng-options="item.value as item.name for item in features">
-                                                    <option value="">-- All --</option>
-                                                    </select>
-                                        </div>
-
-
                                         <div class="form-group filter-submit">
                                             <a class="btn btn-primary" ng-click="filter()">Filter</a>
                                             <a class="btn btn-default" ng-click="reset()">Reset</a>
@@ -77,13 +62,13 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Category</th>
-                                    <th>Feature</th>
+                                    <th>Tiêu đề</th>
+                                    <th>Thể loại</th>
                                     <th>Status</th>
-                                    <th>Created on</th>
+                                    <th>Người đăng</th>
+                                    <th>Ngày tạo</th>
                                     <!-- <th>Created by</th> -->
-                                    <th>Action</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,16 +78,17 @@
                                     <td>
                                         {{post.category.name}}
                                     </td>
-                                    <td>
-                                        <span ng-if="post.feature == 1">Feature </span>
-                                        <span ng-if="post.feature == 0">No </span>
-                                    </td>
                                     <td><span class="label label-success" ng-if="post.status == 1">Publish </span><span class="label label-danger" ng-if="post.status == 0">Unpublish </span></td>
-                                    <td>{{post.created | date:'medium'}}</td>
+                                    <td>{{post.user.name}} <span class="label label-success" ng-if="post.user.is_seed == 1">Seed</span></td>
+                                    <td>{{post.created | date:'hh:mm dd/MM/yyyy'}}</td>
                                     <!-- <td>{{post.user.name}}</td> -->
                                     <td>
-                                        <a data-ui-sref="editPost({postId: post._id})" title="Edit"><i
-                                            class="glyphicon glyphicon-edit"></i></a> &nbsp; &nbsp;
+                                        <a title="Link" href="{{webUrl}}/{{post.communityId.slug}}/chia-se-thao-luan/{{post.slug}}/{{post.shortId}}" target="_blank">
+                                            <i class="glyphicon glyphicon-link"></i>
+                                        </a>
+                                        <a data-ui-sref="editPost({postId: post._id})" title="Edit">
+                                            <i class="glyphicon glyphicon-edit"></i>
+                                        </a>
                                         <a ng-click="remove(post._id)" title="Delete">
                                             <i class="glyphicon glyphicon-trash"></i>
                                         </a>

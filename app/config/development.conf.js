@@ -24,18 +24,7 @@ module.exports = {
                 },
             },
             assets: {
-                admin: {
-                    js: [
-                        ...assets.admin.js.concat,
-                        ...assets.admin.js.noaction,
-                        ...assets.admin.js.build,
-                        // '/assets/min/app.min.js',
-                    ],
-                    css: [
-                        ...assets.admin.css,
-                        // '/assets/min/app.min.css',
-                    ]
-                }
+                admin: assets.admin
             }
         }
     }

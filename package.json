@@ -9,6 +9,8 @@
   "author": "Phong Nguyễn",
   "license": "ISC",
   "dependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "bcryptjs": "^2.4.3",
     "easyimage": "^2.1.0",
     "entities": "^1.1.1",

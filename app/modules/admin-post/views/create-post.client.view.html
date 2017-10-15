@@ -5,18 +5,18 @@
     <!-- Main content -->
     <section class="content">
         <div class="row">
-            <div class="col-md-12">
-                <div class="box box-primary">
-                    <div class="box-body">
-                        <div class="form-group">
-                            <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
+            <div class="callout">
+                <div class="box-footer">
+                    <div class="form-group">
+                        <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
                       &nbsp;&nbsp; -->
-                            <a class="btn btn-primary" ng-click="create(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
-                            <a class="btn btn-primary" ng-click="create(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
-                            <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
-                        </div>
-                        <notice-dir></notice-dir>
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
+                        <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
                     </div>
+
+                    <notice-dir> </notice-dir>
+
                 </div>
             </div>
             <form name="PostForm" novalidate>
@@ -29,7 +29,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="title">Title</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
+                                    <input type="text" ng-change="changeSlug(title)" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
                                 </div>
                                 <div class="error-messages message" ng-messages="PostForm.title.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
@@ -38,7 +38,7 @@
                             <div class="form-group">
                                 <label class="control-label" for="title">Slug</label>
                                 <div class="controls">
-                                    <input type="text" data-ng-model="slug" id="slug" class="form-control" placeholder="Slug" slug-generator="title">
+                                    <input type="text" data-ng-model="slug" id="slug" class="form-control" placeholder="Slug">
                                 </div>
                             </div>
                             <!--<div class="form-group">
@@ -108,41 +108,20 @@
                             </div>
                             <div class="form-group">
                                 <label class="control-label" for="tags">Tags</label>
-                                <div class="controls relative">
-                                    <select ui-select2="select2Options" handle-select-mutiple handle-list="taglist.items" handle-text="name" handle-value="_id" class="form-control" data-ng-model="tag" id="tag" name="tag" ng-options="tag._id as tag.name for tag in taglist.items" data-placeholder="Select tags"
-                                        multiple="multiple" ng-required="true">
+                                <div class="controls ">
+                                    <select ui-select2="select2Options" handle-select-multiple handle-list="tags.items" class="form-control" data-ng-model="tag" id="tag" name="tag" ng-options="tag._id as tag.name for tag in tags.items" data-placeholder="Chọn tags" multiple="multiple" ng-required="true">
                                     </select>
                                 </div>
                                 <div class="error-messages message" ng-messages="PostForm.tag.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message require-msg="You did not select a field" />
                                 </div>
                             </div>
-                            <!-- <div class="form-group">
-                                <label class="control-label" for="user">Poster</label>
-                                <div class="controls">
-                                    <select ui-select2 class="form-control" data-ng-model="user" id="user" name="user" ng-options="user._id as user.name for user in users.items" required>
-                                        </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
-                                    <div ng-message="required">You did not select a field</div>
-                                </div>
-                            </div> -->
                             <div class="form-group">
                                 <label class="control-label" for="user">Poster</label>
-                                <div class="controls" input-class="form-control" id="user" search-select="posterOptions" ng-model="user" select-data="dataSearch" item-show-label="name" item-show-value="_id" fetch-data-func="fetchDataSearch" required placeholder="Select poster" ng-change="changePoster()"></div>
-                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted" mutiable>
-                                    <error-message/>
-                                </div>
-                                <div class="error-messages message" ng-if="submitted && userError" ng-bind="userError">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="control-label" for="feature">Feature</label>
-                                <div class="controls">
-                                    <select class="form-control highlight_select" name="feature" ng-init="feature = 0" data-ng-model="feature" id="feature" ng-options="item.value as item.name for item in features" required>
+                                <select ui-select2 class="form-control" data-ng-model="user" id="user" name="user" ng-options="user._id as user.name for user in users.items" data-placeholder="Chọn user" ng-required="true">
+                                    <option value="">-- Chọn user</option>
                                 </select>
-                                </div>
-                                <div class="error-messages message" ng-messages="PostForm.feature.$error" ng-messages-multiple ng-if="submitted">
+                                <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
                                 </div>
                             </div>

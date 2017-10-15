@@ -143,3 +143,54 @@ angular.module('core')
 //         }
 //     }
 // });
+
+angular.module('core')
+    .directive('handleSelectMultiple', function() {
+        return {
+            restrict: 'A',
+            scope: {
+                // handleList: '@', // in view add attribute normal-variable="<$scope.normal['define in controller']>"
+                handleList: '=', // in view add attribute object-variable="<$scope.object['define in controller']>"
+                // functionVariable: '&', // in view add attribute function-variable="<$scope.function['define in controller']>"
+            },
+            require: 'ngModel',
+            link: function(scope, element, attrs, ngModel) {
+                // element.on('select2:select',function(e) {
+                //     console.log('select2:select: ', e);
+                //     console.log('Value: ', element.val());
+                // });
+
+                function updateView(value) {
+                    // ngModel.$viewValue = value;
+                    ngModel.$render();
+                }
+
+                function pushValue(value) {
+                    ngModel.$modelValue.push(value);
+                    // scope.ngModel = value; // overwrites ngModel value
+                }
+
+                element.on('change', function(e) {
+                    // console.log('change: ', e);
+                    // console.log(attrs, scope.handleList);
+                    // console.log('Value: ', element.val()[0]);
+
+                    var value = element.val();
+
+                    for (var i = 0; i < value.length; i++) {
+                        value[i].split(':').length == 2 ?
+                            value[i] = value[i].split(':')[1] : value[i] = value[i].split(':')[0]
+
+                        // console.log(value[i]);
+
+                        if (ngModel.$modelValue.indexOf(value[i]) == -1) {
+                            pushValue(value[i]);
+                            updateView(value[i]);
+                        }
+                    }
+
+                    // console.log('ngModel', ngModel.$modelValue);
+                });
+            }
+        }
+    });
