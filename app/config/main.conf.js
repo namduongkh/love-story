@@ -14,6 +14,12 @@ module.exports = {
         jwt: {
             secret: 'L7FWdNnQU7cfmQ87WuucQFK3YZvNBuvc'
         },
+        upload: {
+            path: BASE_PATH + '/public/files',
+            avatar: BASE_PATH + '/public/files/avatar',
+            tag: BASE_PATH + '/public/files/tag',
+            post: BASE_PATH + '/public/files/posts'
+        },
         error: {
             web: {
                 login: "/dang-nhap"

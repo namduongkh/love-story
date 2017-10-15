@@ -24,7 +24,7 @@ var PostSchema = new Schema({
     shortId: {
         type: String
     },
-    teaser: {
+    description: {
         type: String,
         default: '',
         trim: true
@@ -33,21 +33,6 @@ var PostSchema = new Schema({
         type: String,
         default: '',
         trim: true
-    },
-    thumb: {
-        type: String,
-        default: '',
-        trim: true
-    },
-    content: {
-        type: String,
-        default: '',
-        // required: 'Please fill content',
-        trim: true
-    },
-    feature: {
-        type: Number,
-        default: 0
     },
     status: {
         type: Number,
@@ -68,7 +53,7 @@ var PostSchema = new Schema({
         type: Schema.ObjectId,
         ref: 'User'
     },
-    attrs: {
+    meta: {
         title: String,
         description: String,
         keyword: String
@@ -76,10 +61,6 @@ var PostSchema = new Schema({
     total_recommened: { // Tổng số lượt khuyên nên đọc
         type: Number,
         default: 0
-    },
-    communityId: {
-        type: Schema.ObjectId,
-        ref: 'Community'
     },
     tags: [{ // Danh sách các tag của bài đăng này
         type: Schema.ObjectId,
@@ -177,32 +158,32 @@ PostSchema.pre('remove', function(next) {
 function makeShortId(len, reply) {
     var id = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  
+
     for (var i = 0; i < len; i++)
-      id += possible.charAt(Math.floor(Math.random() * possible.length));
-    
+        id += possible.charAt(Math.floor(Math.random() * possible.length));
+
     let Post = mongoose.model("Post");
     Post.findOne({
-        shortId: id
-    })
-    .then(post=>{
-        if (post && post.length) {
-            id += possible.charAt(Math.floor(Math.random() * possible.length));
-        }
-        return reply({
             shortId: id
         })
-    })
-    .catch(err=>{
-        return reply({
-            shortId: id
+        .then(post => {
+            if (post && post.length) {
+                id += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return reply({
+                shortId: id
+            })
         })
-    });
+        .catch(err => {
+            return reply({
+                shortId: id
+            })
+        });
 }
 
 PostSchema.pre('save', function(next) {
-    if (!this.shortId) {   
-        makeShortId(10, resp=>{
+    if (!this.shortId) {
+        makeShortId(10, resp => {
             this.shortId = resp.shortId;
             next();
         })

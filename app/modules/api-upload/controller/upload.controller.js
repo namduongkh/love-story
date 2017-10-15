@@ -10,6 +10,7 @@ const mkdirp = require('mkdirp');
 const requestF = require('request');
 const easyimg = require('easyimage');
 const rimraf = require('rimraf');
+const moment = require('moment');
 
 //get file extension
 var getFileExt = function(fileName) {
@@ -244,8 +245,8 @@ exports.uploadPostContentImage = {
     handler: function(request, reply) {
         let configManager = request.server.plugins['hapi-kea-config'];
         let data = request.payload;
-        let year = (new Date()).getUTCFullYear();
-        let month = ((new Date()).getUTCMonth() + 1) < 10 ? '0' + ((new Date()).getUTCMonth() + 1) : ((new Date()).getUTCMonth() + 1);
+        let year = moment().format("YYYY");
+        let month = moment().format("MM");
 
         if (data.type && data.type == 'buffer') {
             data.file = data.file.toString('base64');

@@ -1,8 +1,8 @@
 'use strict';
 
-// Posts controller
-angular.module('posts').controller('PostsController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Posts', 'Categories', 'Notice', 'localStorageService', 'PostSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
-    function($scope, $stateParams, $location, $window, Option, Authentication, Posts, Categories, Notice, localStorageService, PostSvc, Tags, Users, SearchSelectSvc, FileUploader) {
+// Chapters controller
+angular.module('chapters').controller('ChaptersController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Chapters', 'Categories', 'Notice', 'localStorageService', 'ChapterSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
+    function($scope, $stateParams, $location, $window, Option, Authentication, Chapters, Categories, Notice, localStorageService, ChapterSvc, Tags, Users, SearchSelectSvc, FileUploader) {
 
         if (!Authentication.user.name) {
             $location.path('signin');
@@ -14,7 +14,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
 
         $scope.statuses = Option.getStatus();
 
-        // $scope.features = Option.getFeaturePost();
+        // $scope.features = Option.getFeatureChapter();
 
         $scope.authentication = Authentication;
 
@@ -22,7 +22,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
 
         $scope.tags = {};
 
-        $scope.postsPath = '/files/posts/';
+        $scope.chaptersPath = '/files/chapters/';
 
         $scope.isUploadImage = false;
 
@@ -31,7 +31,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         var uploader = $scope.uploader = new FileUploader({
             url: $scope.apiUrl + '/api/upload/image',
             formData: [{
-                type: 'posts'
+                type: 'chapters'
             }],
             autoUpload: true
         });
@@ -54,9 +54,9 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             });
         };
         uploader.onSuccessItem = function(fileItem, response, status, headers) {
-            $scope.review_image = $scope.webUrl + $scope.postsPath + response.file.filename;
-            if ($scope.post) {
-                $scope.post.image = response.file.filename;
+            $scope.review_image = $scope.webUrl + $scope.chaptersPath + response.file.filename;
+            if ($scope.chapter) {
+                $scope.chapter.image = response.file.filename;
             } else {
                 $scope.image = response.file.filename;
             }
@@ -109,10 +109,10 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                     file: blobInfo.base64(),
                     name: blobInfo.filename()
                 }
-                PostSvc.uploadPostContentImage(data)
+                ChapterSvc.uploadChapterContentImage(data)
                     .then(resp => {
                         if (resp.status == 200) {
-                            var path = $scope.webUrl + $scope.postsPath + resp.data.location;
+                            var path = $scope.webUrl + $scope.chaptersPath + resp.data.location;
                             console.log({ path });
                             success(path);
                         }
@@ -120,7 +120,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             }
         };
 
-        // Init post
+        // Init chapter
         $scope.tags = Tags.getList({}, function(result) {});
         $scope.users = Users.query({
             role: 'user',
@@ -129,12 +129,12 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         }, function(resp) {});
 
         $scope.gotoList = function() {
-            $location.path('posts');
+            $location.path('chapters');
         }
 
         $scope.categories = Categories.query({});
 
-        // Create new Post
+        // Create new Chapter
         $scope.create = function(isValid, gotoList) {
             $scope.submitted = true;
             $scope.userError = false;
@@ -146,8 +146,8 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
             }
-            // Create new Post object
-            var post = new Posts({
+            // Create new Chapter object
+            var chapter = new Chapters({
                 title: this.title,
                 slug: this.slug,
                 feature: this.feature,
@@ -164,21 +164,21 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             });
 
             // Redirect after save
-            post.$save(function(response) {
+            chapter.$save(function(response) {
 
                 var data = {
                     id: response._id
                 }
-                PostSvc.getImageFromContent(data).then(resp => {
+                ChapterSvc.getImageFromContent(data).then(resp => {
                     if (response.error) {
                         Notice.setNotice(response.message, 'ERROR', true);
                     } else {
-                        Notice.setNotice("Save post success!", 'SUCCESS');
+                        Notice.setNotice("Save chapter success!", 'SUCCESS');
                         if (gotoList) {
                             $scope.gotoList();
                         } else {
-                            $location.path('posts/' + response._id + '/edit');
-                            // $scope.success = "Insert post success!";
+                            $location.path('chapters/' + response._id + '/edit');
+                            // $scope.success = "Insert chapter success!";
                             $scope.submitted = false;
                             $scope.title = '';
                         }
@@ -189,27 +189,27 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             });
         };
 
-        // Remove existing Post
-        $scope.remove = function(postId) {
+        // Remove existing Chapter
+        $scope.remove = function(chapterId) {
             if (confirm("Do you want to remove?")) {
 
-                var post = Posts.get({
-                    postId: postId
+                var chapter = Chapters.get({
+                    chapterId: chapterId
                 });
 
-                post.$remove({
-                    postId: postId
+                chapter.$remove({
+                    chapterId: chapterId
                 });
 
                 for (var i in $scope.items) {
-                    if ($scope.items[i]._id == postId) {
+                    if ($scope.items[i]._id == chapterId) {
                         $scope.items.splice(i, 1);
                     }
                 }
 
-                Notice.setNotice("Delete post success!", 'SUCCESS');
+                Notice.setNotice("Delete chapter success!", 'SUCCESS');
 
-                if ($stateParams.postId) {
+                if ($stateParams.chapterId) {
                     $scope.gotoList();
                 } else {
                     Notice.requireChange();
@@ -217,12 +217,12 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             }
         };
 
-        // Update existing Post
+        // Update existing Chapter
         $scope.update = function(isValid, gotoList) {
             var gotoList = typeof gotoList !== 'undefined' ? gotoList : null;
             $scope.submitted = true;
             $scope.userError = null;
-            if ($scope.post.user == null) {
+            if ($scope.chapter.user == null) {
                 $scope.userError = "You did not select a field";
                 isValid = false;
             }
@@ -230,13 +230,13 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
             }
-            var post = $scope.post;
-            delete post.created;
-            delete post.__v;
-            post.$update(function(resp) {
-                //$location.path('posts/' + post._id);
+            var chapter = $scope.chapter;
+            delete chapter.created;
+            delete chapter.__v;
+            chapter.$update(function(resp) {
+                //$location.path('chapters/' + chapter._id);
                 var data = { id: resp._id }
-                PostSvc.getImageFromContent(data).then(result => {
+                ChapterSvc.getImageFromContent(data).then(result => {
                     if (resp.error) {
                         Notice.setNotice(resp.message, 'ERROR', true);
                     } else {
@@ -255,22 +255,22 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             });
         };
 
-        // Find existing Post
+        // Find existing Chapter
         $scope.findOne = function() {
-            $scope.post = Posts.get({
-                postId: $stateParams.postId
+            $scope.chapter = Chapters.get({
+                chapterId: $stateParams.chapterId
             }, function(resp) {
-                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'post' }, function(result) {
+                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'chapter' }, function(result) {
                 //     $scope.taglist = result;
                 // })
-                if ($scope.post.thumb) {
-                    $scope.review_thumb = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.thumb;
+                if ($scope.chapter.thumb) {
+                    $scope.review_thumb = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.thumb;
                 }
-                if ($scope.post.image) {
-                    $scope.review_image = $scope.webUrl + $scope.postsPath + resp._id + '/' + $scope.post.image;
+                if ($scope.chapter.image) {
+                    $scope.review_image = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.image;
                 }
-                // if ($scope.post.user) {
-                //     SearchSelectSvc.updateNgModel($scope.post.user);
+                // if ($scope.chapter.user) {
+                //     SearchSelectSvc.updateNgModel($scope.chapter.user);
                 // }
                 $scope.render_select = true;
             });
@@ -299,11 +299,11 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 status: $scope.search.status,
                 feature: $scope.search.feature
             };
-            localStorageService.set('post.filterData', {
+            localStorageService.set('chapter.filterData', {
                 currentPage: $scope.currentPage,
                 search: $scope.search
             });
-            Posts.query(options, function(data) {
+            Chapters.query(options, function(data) {
                 $scope.items = data.items;
                 $scope.totalItems = data.totalItems;
                 $scope.itemsPerPage = data.itemsPerPage;
@@ -313,7 +313,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             });
         }
 
-        // Find a list of Posts
+        // Find a list of Chapters
         $scope.find = function() {
             if (!$.isEmptyObject($location.search())) {
                 var filterData = $location.search();
@@ -323,7 +323,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 $scope.search.status = !isNaN(filterData.status) ? Number(filterData.status) : null;
                 $scope.search.feature = !isNaN(filterData.feature) ? Number(filterData.feature) : null;
             } else {
-                var filterData = localStorageService.get('post.filterData');
+                var filterData = localStorageService.get('chapter.filterData');
                 if (filterData) {
                     // console.log("filter by local store", filterData);
                     $scope.currentPage = filterData.currentPage;
@@ -362,12 +362,12 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         $scope.changeSlug = function(value, edit) {
             var new_slug = slug(value).toLowerCase();
             if (edit) {
-                $scope.post.slug = new_slug;
+                $scope.chapter.slug = new_slug;
             } else {
                 $scope.slug = new_slug;
             }
         };
-        //Sreach Poster
+        //Sreach Chapterer
         $scope.fetchDataSearch = function(keyword) {
             Users.query({
                 keyword: keyword,

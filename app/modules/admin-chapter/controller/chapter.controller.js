@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const Boom = require('boom');
 const util = require('util');
 const Joi = require('joi');
-const Post = mongoose.model('Post');
+const Chapter = mongoose.model('Chapter');
 const _ = require('lodash');
 const Slug = require('slug');
 const async = require("async");
@@ -37,11 +37,11 @@ exports.getAll = {
             options.title = re;
         }
 
-        Post.find(options)
+        Chapter.find(options)
             .populate('category')
             .populate('user', 'name is_seed').lean().sort('-created').paginate(page, itemsPerPage, function(err, items, total) {
                 if (err) {
-                    request.log(['error', 'list', 'post'], err);
+                    request.log(['error', 'list', 'chapter'], err);
                     console.log("err", err);
                     return reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
                 }
@@ -54,14 +54,14 @@ exports.getAll = {
 
 exports.edit = {
     pre: [
-        { method: getById, assign: 'post' }
+        { method: getById, assign: 'chapter' }
     ],
     handler: function(request, reply) {
-        let post = request.pre.post;
-        if (post) {
-            return reply(post);
+        let chapter = request.pre.chapter;
+        if (chapter) {
+            return reply(chapter);
         } else {
-            reply(Boom.notFound('Post is not found'));
+            reply(Boom.notFound('Chapter is not found'));
         }
     }
 }
@@ -88,18 +88,18 @@ exports.save = {
             request.payload.slug = slugStatus.slug;
         }
 
-        let post = new Post(request.payload);
-        post.tags = tags;
-        let promise = post.save();
-        promise.then(function(post) {
-            reply(post);
+        let chapter = new Chapter(request.payload);
+        chapter.tags = tags;
+        let promise = chapter.save();
+        promise.then(function(chapter) {
+            reply(chapter);
         }).catch(function(err) {
-            request.log(['error', 'post'], err);
+            request.log(['error', 'chapter'], err);
             reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
 
         });
     },
-    description: 'Created post',
+    description: 'Created chapter',
     tags: ['api'],
     plugins: {
         'hapi-swagger': {
@@ -121,7 +121,7 @@ exports.save = {
             tags: Joi.any().description('Tags'),
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
-            user: Joi.any().required().description('Poster'),
+            user: Joi.any().required().description('Chapterer'),
             total_recommened: Joi.any().description('Total recommened')
         }
     }
@@ -130,7 +130,7 @@ exports.save = {
 exports.update = {
     pre: [{
             method: getById,
-            assign: 'post'
+            assign: 'chapter'
         },
         {
             method: checkSlug,
@@ -143,7 +143,7 @@ exports.update = {
     ],
     handler: function(request, reply) {
         let {
-            post,
+            chapter,
             slugStatus,
             tags
         } = request.pre;
@@ -154,17 +154,17 @@ exports.update = {
             request.payload.slug = slugStatus.slug;
         }
 
-        post = _.extend(post, request.payload);
-        post.tags = tags;
-        let promise = post.save();
+        chapter = _.extend(chapter, request.payload);
+        chapter.tags = tags;
+        let promise = chapter.save();
 
-        promise.then(function(post) {
-            reply(post);
+        promise.then(function(chapter) {
+            reply(chapter);
         }).catch(function(err) {
             reply(Boom.badRequest(ErrorHandler.getErrorMessage(err)));
         });
     },
-    description: 'Update post',
+    description: 'Update chapter',
     tags: ['api'],
     plugins: {
         'hapi-swagger': {
@@ -188,7 +188,7 @@ exports.update = {
             tags: Joi.any().description('Tags'),
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
-            user: Joi.any().required().description('Poster'),
+            user: Joi.any().required().description('Chapterer'),
             total_recommened: Joi.any().description('Total recommened')
         },
         options: {
@@ -198,12 +198,12 @@ exports.update = {
 }
 exports.delete = {
     pre: [
-        { method: getById, assign: 'post' }
+        { method: getById, assign: 'chapter' }
     ],
     handler: function(request, reply) {
-        const post = request.pre.post;
-        post.remove((err) => {
-            return reply(post);
+        const chapter = request.pre.chapter;
+        chapter.remove((err) => {
+            return reply(chapter);
         });
     }
 }
@@ -213,12 +213,12 @@ exports.delete = {
  */
 function getById(request, reply) {
     const id = request.params.id || request.payload.id;
-    let promise = Post.findOne({
+    let promise = Chapter.findOne({
         '_id': id
     });
     // .populate("user", "_id name");
-    promise.then(function(post) {
-        reply(post);
+    promise.then(function(chapter) {
+        reply(chapter);
     }).catch(function(err) {
         request.log(['error'], err);
         return reply.continue();
@@ -238,14 +238,14 @@ function checkSlug(request, reply) {
     }
     newSlug = newSlug.toLowerCase();
     if (_id) {
-        var promise = Post.find({
+        var promise = Chapter.find({
             slug: newSlug,
             _id: {
                 $ne: _id
             }
         });
     } else {
-        var promise = Post.find({
+        var promise = Chapter.find({
             slug: newSlug
         });
     }

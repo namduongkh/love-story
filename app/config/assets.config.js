@@ -15,6 +15,7 @@ module.exports = {
             '/libs/ng-file-upload/ng-file-upload.min.js',
             '/libs/AdminLTE/plugins/select2/select2.min.js',
             '/libs/angular-ui-select2/src/select2.js',
+            '/libs/angular-file-upload/dist/angular-file-upload.min.js',
 
             '/libs/tinymce/tinymce.min.js',
             '/libs/angular-ui-tinymce/dist/tinymce.min.js',
