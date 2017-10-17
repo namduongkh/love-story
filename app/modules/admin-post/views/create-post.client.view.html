@@ -1,6 +1,6 @@
 <section data-ng-controller="PostsController" ng-init="initialPost()">
     <section class="content-header">
-        <h1>Posts</h1>
+        <h1>Bộ truyện</h1>
     </section>
     <!-- Main content -->
     <section class="content">
@@ -10,12 +10,12 @@
                     <div class="form-group">
                         <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
                       &nbsp;&nbsp; -->
-                        <a class="btn btn-primary" ng-click="create(PostForm.$valid, 'GOTOLIST')">Save & List</a> &nbsp;&nbsp;
-                        <a class="btn btn-primary" ng-click="create(PostForm.$valid)">Apply</a> &nbsp;&nbsp;
-                        <input type="button" value="Cancel" class="btn btn-default" ng-click="gotoList()">
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid, 'GOTOLIST')">Lưu & thoát</a> &nbsp;&nbsp;
+                        <a class="btn btn-primary" ng-click="create(PostForm.$valid)">Lưu</a> &nbsp;&nbsp;
+                        <input type="button" value="Thoát" class="btn btn-default" ng-click="gotoList()">
                     </div>
 
-                    <notice-dir> </notice-dir>
+                    <notice-dir></notice-dir>
 
                 </div>
             </div>
@@ -23,11 +23,11 @@
                 <div class="col-md-8">
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">New Post</h3>
+                            <h3 class="box-title">Bộ truyện mới</h3>
                         </div>
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="title">Title</label>
+                                <label class="control-label" for="title">Tiêu đề</label>
                                 <div class="controls">
                                     <input type="text" ng-change="changeSlug(title)" data-ng-model="title" name="title" id="title" class="form-control" placeholder="Title" required>
                                 </div>
@@ -42,12 +42,12 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="image">Image</label>
+                                <label class="control-label" for="image">Hình đại diện</label>
                                 <div class="controls">
                                     <input type="file" name="file" nv-file-select uploader="uploader" />
                                     <input type="hidden" name="image" ng-model="image">
                                     <img ng-src="{{review_image}}" ng-show="review_image" style="max-width: 200px; max-height: 200px; padding-top: 10px" />
-                                    <p class="help-block" ng-hide="review_image">Allow file: Image</p>
+                                    <p class="help-block" ng-hide="review_image">Cho phép: hình ảnh</p>
                                     <div ng-show="isUploadImage">
                                         <div class="progress progress-sm active">
                                             <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
@@ -57,11 +57,11 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="content">Content</label>
+                                <label class="control-label" for="description">Giới thiệu</label>
                                 <div class="controls">
-                                    <textarea class="form-control" ui-tinymce="tinymceOptions" name="content" data-ng-model="content" rows="10"></textarea>
+                                    <textarea class="form-control" ui-tinymce="tinymceOptions" name="description" data-ng-model="description" rows="10"></textarea>
                                 </div>
-                                <div class="error-messages message" ng-messages="PostForm.content.$error" ng-messages-multiple ng-if="submitted">
+                                <div class="error-messages message" ng-messages="PostForm.description.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
                                 </div>
                             </div>
@@ -72,7 +72,7 @@
                     <div class="box box-default">
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="categories">Categories</label>
+                                <label class="control-label" for="categories">Thể loại</label>
                                 <div class="controls">
                                     <select ui-select2 class="form-control" name="category" data-ng-model="category" id="category" ng-options="category._id as category.name for category in categories.items" required>
                                         <!-- <option value="">uncategory</option> -->
@@ -83,7 +83,7 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="tags">Tags</label>
+                                <label class="control-label" for="tags">Nhãn</label>
                                 <div class="controls ">
                                     <select ui-select2="select2Options" handle-select-multiple handle-list="tags.items" class="form-control" data-ng-model="tag" id="tag" name="tag" ng-options="tag._id as tag.name for tag in tags.items" data-placeholder="Chọn tags" multiple="multiple" ng-required="true">
                                     </select>
@@ -93,16 +93,16 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="user">Poster</label>
+                                <label class="control-label" for="user">Tác giả</label>
                                 <select ui-select2 class="form-control" data-ng-model="user" id="user" name="user" ng-options="user._id as user.name for user in users.items" data-placeholder="Chọn user" ng-required="true">
-                                    <option value="">-- Chọn user</option>
+                                    <option value="">-- Chọn tác giả</option>
                                 </select>
                                 <div class="error-messages message" ng-messages="PostForm.user.$error" ng-messages-multiple ng-if="submitted">
                                     <error-message/>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="status">Status</label>
+                                <label class="control-label" for="status">Trạng thái</label>
                                 <div class="controls">
                                     <select class="form-control highlight_select" name="status" ng-init="status = 1" data-ng-model="status" id="status" ng-options="item.value as item.name for item in statuses" required>
                                 </select>
@@ -116,19 +116,19 @@
                     <div class="box box-default">
                         <div class="box-body">
                             <div class="form-group">
-                                <label class="control-label" for="meta_title">Meta Title</label>
+                                <label class="control-label" for="meta_title">Meta title</label>
                                 <div class="controls">
                                     <textarea class="form-control" data-ng-model="meta.title" rows="1"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="meta_desc">Meta Description</label>
+                                <label class="control-label" for="meta_desc">Meta description</label>
                                 <div class="controls">
                                     <textarea class="form-control" data-ng-model="meta.description" rows="2"></textarea>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="meta_desc">Meta Keyword</label>
+                                <label class="control-label" for="meta_desc">Meta keyword</label>
                                 <div class="controls">
                                     <textarea class="form-control" data-ng-model="meta.keyword" rows="2"></textarea>
                                 </div>

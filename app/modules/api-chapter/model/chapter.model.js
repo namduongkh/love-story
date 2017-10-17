@@ -24,6 +24,10 @@ var ChapterSchema = new Schema({
     shortId: {
         type: String
     },
+    postId: {
+        type: Schema.ObjectId,
+        ref: 'Post'
+    },
     content: {
         type: String,
         default: '',

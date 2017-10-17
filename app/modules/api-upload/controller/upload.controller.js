@@ -240,7 +240,7 @@ exports.duplicateFolder = {
     }
 }
 
-exports.uploadPostContentImage = {
+exports.uploadChapterContentImage = {
     auth: false,
     handler: function(request, reply) {
         let configManager = request.server.plugins['hapi-kea-config'];
@@ -254,9 +254,9 @@ exports.uploadPostContentImage = {
         }
 
         if (data.file && data.name) {
-            mkdirp(configManager.get('web.upload.post') + "/" + year + '/' + month, function(err) {
+            mkdirp(configManager.get('web.upload.chapter') + "/" + year + '/' + month, function(err) {
                 // let base64Data = replaceBase64(data.file);
-                let path = configManager.get('web.upload.post') + '/' + year + '/' + month + '/' + data.name;
+                let path = configManager.get('web.upload.chapter') + '/' + year + '/' + month + '/' + data.name;
                 fs.writeFile(path, data.file, 'base64', function(err) {
                     //resize image
                     easyimg.info(path).then(file => {

@@ -131,8 +131,8 @@ exports.register = function(server, options, next) {
 
     server.route({
         method: 'POST',
-        path: '/api/upload/uploadPostContentImage',
-        config: UploadController.uploadPostContentImage
+        path: '/api/upload/uploadChapterContentImage',
+        config: UploadController.uploadChapterContentImage
     });
 
     next();

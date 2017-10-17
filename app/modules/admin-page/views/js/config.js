@@ -7,7 +7,7 @@ angular.module('pages').run(['Menus',
         // Set top bar menu items
         Menus.addMenuItem('topbar', 'Trang', 'pages', 'dropdown', '/pages(/create)?');
         Menus.addSubMenuItem('topbar', 'pages', 'Danh sách', 'pages');
-        Menus.addSubMenuItem('topbar', 'pages', 'Tạo mới', 'pages/create');
+        Menus.addSubMenuItem('topbar', 'pages', 'Trang mới', 'pages/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {

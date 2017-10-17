@@ -1,12 +1,25 @@
 'use strict';
 
 // Chapters controller
-angular.module('chapters').controller('ChaptersController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Chapters', 'Categories', 'Notice', 'localStorageService', 'ChapterSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
-    function($scope, $stateParams, $location, $window, Option, Authentication, Chapters, Categories, Notice, localStorageService, ChapterSvc, Tags, Users, SearchSelectSvc, FileUploader) {
+angular.module('chapters').controller('ChaptersController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Chapters', 'Categories', 'Notice', 'localStorageService', 'ChapterSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader', 'Posts', '$state',
+    function($scope, $stateParams, $location, $window, Option, Authentication, Chapters, Categories, Notice, localStorageService, ChapterSvc, Tags, Users, SearchSelectSvc, FileUploader, Posts, $state) {
+
+        if ($location.search().postId) {
+            $scope.postIds = Posts.query({});
+            $scope.queryPostId = $location.search().postId;
+            $scope.postId = $scope.queryPostId;
+            if ($scope.post) {
+                $scope.post.postId = $scope.queryPostId;
+            }
+        } else {
+            $state.go("listPosts");
+        }
 
         if (!Authentication.user.name) {
             $location.path('signin');
         }
+
+        $scope.chaptersPath = '/files/chapters/';
 
         $scope.apiUrl = $window.settings.services.apiUrl;
 
@@ -14,59 +27,7 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
 
         $scope.statuses = Option.getStatus();
 
-        // $scope.features = Option.getFeatureChapter();
-
         $scope.authentication = Authentication;
-
-        $scope.communities = {};
-
-        $scope.tags = {};
-
-        $scope.chaptersPath = '/files/chapters/';
-
-        $scope.isUploadImage = false;
-
-        $scope.isInvalidFile = false;
-
-        var uploader = $scope.uploader = new FileUploader({
-            url: $scope.apiUrl + '/api/upload/image',
-            formData: [{
-                type: 'chapters'
-            }],
-            autoUpload: true
-        });
-
-        // FILTERS
-        uploader.filters.push({
-            name: 'imageFilter',
-            fn: function(item /*{File|FileLikeObject}*/ , options) {
-                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-            }
-        });
-        // CALLBACKS
-        uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/ , filter, options) {
-            //console.info('onWhenAddingFileFailed', item, filter, options);
-        };
-        uploader.onBeforeUploadItem = function(item) {
-            $scope.$apply(function() {
-                $scope.isUploadImage = true;
-            });
-        };
-        uploader.onSuccessItem = function(fileItem, response, status, headers) {
-            $scope.review_image = $scope.webUrl + $scope.chaptersPath + response.file.filename;
-            if ($scope.chapter) {
-                $scope.chapter.image = response.file.filename;
-            } else {
-                $scope.image = response.file.filename;
-            }
-        };
-
-        uploader.onCompleteItem = function(fileItem, response, status, headers) {
-            $scope.$apply(function() {
-                $scope.isUploadImage = false;
-            });
-        };
 
         $scope.tinymceOptions = {
             plugins: "image",
@@ -113,35 +74,21 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
                     .then(resp => {
                         if (resp.status == 200) {
                             var path = $scope.webUrl + $scope.chaptersPath + resp.data.location;
-                            console.log({ path });
+                            console.log({ path })
                             success(path);
                         }
                     })
             }
         };
 
-        // Init chapter
-        $scope.tags = Tags.getList({}, function(result) {});
-        $scope.users = Users.query({
-            role: 'user',
-            page: 'all',
-            status: 1
-        }, function(resp) {});
-
         $scope.gotoList = function() {
-            $location.path('chapters');
+            // $location.path('chapters');
+            $state.go("listChapters", { postId: $scope.queryPostId });
         }
-
-        $scope.categories = Categories.query({});
 
         // Create new Chapter
         $scope.create = function(isValid, gotoList) {
             $scope.submitted = true;
-            $scope.userError = false;
-            if (this.user == null) {
-                $scope.userError = "You did not select a field";
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -150,40 +97,31 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
             var chapter = new Chapters({
                 title: this.title,
                 slug: this.slug,
-                feature: this.feature,
-                // teaser: this.teaser,
-                image: this.image,
-                thumb: this.thumb,
                 content: this.content,
                 status: this.status,
-                category: this.category,
                 meta: this.meta,
-                communityId: this.community,
-                tags: this.tag,
-                user: this.user
+                postId: this.postId,
             });
 
             // Redirect after save
             chapter.$save(function(response) {
-
-                var data = {
-                    id: response._id
-                }
-                ChapterSvc.getImageFromContent(data).then(resp => {
-                    if (response.error) {
-                        Notice.setNotice(response.message, 'ERROR', true);
+                // var data = { id: response._id };
+                // ChapterSvc.getImageFromContent(data).then(resp => {
+                if (response.error) {
+                    Notice.setNotice(response.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Save chapter success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
                     } else {
-                        Notice.setNotice("Save chapter success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            $location.path('chapters/' + response._id + '/edit');
-                            // $scope.success = "Insert chapter success!";
-                            $scope.submitted = false;
-                            $scope.title = '';
-                        }
+                        // $location.path('chapters/' + response._id + '/edit');
+                        // $scope.success = "Insert chapter success!";
+                        $state.go("editChapters", { postId: $scope.queryPostId });
+                        $scope.submitted = false;
+                        Notice.requireChange();
                     }
-                });
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });
@@ -221,11 +159,6 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
         $scope.update = function(isValid, gotoList) {
             var gotoList = typeof gotoList !== 'undefined' ? gotoList : null;
             $scope.submitted = true;
-            $scope.userError = null;
-            if ($scope.chapter.user == null) {
-                $scope.userError = "You did not select a field";
-                isValid = false;
-            }
             if (!isValid) {
                 Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
                 return;
@@ -235,21 +168,21 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
             delete chapter.__v;
             chapter.$update(function(resp) {
                 //$location.path('chapters/' + chapter._id);
-                var data = { id: resp._id }
-                ChapterSvc.getImageFromContent(data).then(result => {
-                    if (resp.error) {
-                        Notice.setNotice(resp.message, 'ERROR', true);
+                // var data = { id: resp._id }
+                // ChapterSvc.getImageFromContent(data).then(result => {
+                if (resp.error) {
+                    Notice.setNotice(resp.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Update page success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
                     } else {
-                        Notice.setNotice("Update page success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            // $location.path('transactions/' + transaction._id);
-                            Notice.requireChange();
-                            $scope.submitted = false;
-                        }
+                        // $location.path('transactions/' + transaction._id);
+                        Notice.requireChange();
+                        $scope.submitted = false;
                     }
-                });
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });
@@ -366,15 +299,6 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
             } else {
                 $scope.slug = new_slug;
             }
-        };
-        //Sreach Chapterer
-        $scope.fetchDataSearch = function(keyword) {
-            Users.query({
-                keyword: keyword,
-                status: 1
-            }, function(data) {
-                $scope.dataSearch = data.items;
-            });
         };
     }
 ]);

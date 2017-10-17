@@ -67,7 +67,7 @@
                                     <th>Status</th>
                                     <th>Người đăng</th>
                                     <th>Ngày tạo</th>
-                                    <!-- <th>Created by</th> -->
+                                    <th>Tập truyện</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -78,14 +78,15 @@
                                     <td>
                                         {{post.category.name}}
                                     </td>
-                                    <td><span class="label label-success" ng-if="post.status == 1">Publish </span><span class="label label-danger" ng-if="post.status == 0">Unpublish </span></td>
+                                    <td><span class="label label-success" ng-if="post.status == 1">Công khai</span><span class="label label-danger" ng-if="post.status == 0">Không công khai</span></td>
                                     <td>{{post.user.name}} <span class="label label-success" ng-if="post.user.is_seed == 1">Seed</span></td>
                                     <td>{{post.created | date:'hh:mm dd/MM/yyyy'}}</td>
-                                    <!-- <td>{{post.user.name}}</td> -->
                                     <td>
-                                        <a title="Link" href="{{webUrl}}/{{post.communityId.slug}}/chia-se-thao-luan/{{post.slug}}/{{post.shortId}}" target="_blank">
-                                            <i class="glyphicon glyphicon-link"></i>
+                                        <a data-ui-sref="listChapters({postId: post._id})" title="Xem tập truyện">
+                                            Xem danh sách
                                         </a>
+                                    </td>
+                                    <td>
                                         <a data-ui-sref="editPost({postId: post._id})" title="Edit">
                                             <i class="glyphicon glyphicon-edit"></i>
                                         </a>

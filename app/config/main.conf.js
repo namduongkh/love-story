@@ -18,7 +18,8 @@ module.exports = {
             path: BASE_PATH + '/public/files',
             avatar: BASE_PATH + '/public/files/avatar',
             tag: BASE_PATH + '/public/files/tag',
-            post: BASE_PATH + '/public/files/posts'
+            post: BASE_PATH + '/public/files/posts',
+            chapter: BASE_PATH + '/public/files/chapters',
         },
         error: {
             web: {

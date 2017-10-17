@@ -5,9 +5,9 @@ ApplicationConfiguration.registerModule('posts');
 angular.module('posts').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Bài đăng', 'posts', 'dropdown', '/posts(/create)?');
-        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách bài đăng', 'posts');
-        Menus.addSubMenuItem('topbar', 'posts', 'Bài đăng mới', 'posts/create');
+        Menus.addMenuItem('topbar', 'Bộ truyện', 'posts', 'dropdown', '/posts(/create)?');
+        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách', 'posts');
+        Menus.addSubMenuItem('topbar', 'posts', 'Bộ truyện mới', 'posts/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {

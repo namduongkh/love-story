@@ -113,16 +113,8 @@ exports.save = {
             content: Joi.any().description('Content'),
             status: Joi.number().required().description('Status'),
             slug: Joi.string().description('Slug'),
-            category: Joi.any().description('Category'),
-            feature: Joi.any().description('Feature'),
-            thumb: Joi.any().description('Thumms'),
-            image: Joi.any().description('Image'),
             meta: Joi.any().description('Meta'),
-            tags: Joi.any().description('Tags'),
-            recomenedList: Joi.any().description('Recommened List'),
-            userRecomened: Joi.any().description('User Recomened'),
-            user: Joi.any().required().description('Chapterer'),
-            total_recommened: Joi.any().description('Total recommened')
+            postId: Joi.any().description('Post Id'),
         }
     }
 }
@@ -178,18 +170,8 @@ exports.update = {
             content: Joi.any().description('Content'),
             status: Joi.number().required().description('Status'),
             slug: Joi.string().description('Slug'),
-            modified: Joi.date().required().description('Modified'),
-            _id: Joi.string().required().description('MongoID'),
-            category: Joi.any().description('Category'),
-            feature: Joi.any().description('Feature'),
-            thumb: Joi.any().description('Thumms'),
-            image: Joi.any().description('Image'),
             meta: Joi.any().description('Meta'),
-            tags: Joi.any().description('Tags'),
-            recomenedList: Joi.any().description('Recommened List'),
-            userRecomened: Joi.any().description('User Recomened'),
-            user: Joi.any().required().description('Chapterer'),
-            total_recommened: Joi.any().description('Total recommened')
+            postId: Joi.any().description('Post Id'),
         },
         options: {
             allowUnknown: true

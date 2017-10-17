@@ -1,6 +1,6 @@
-<section data-ng-controller="PostsController" data-ng-init="find()">
+<section data-ng-controller="ChaptersController" data-ng-init="find()">
     <section class="content-header">
-        <h1>Posts</h1>
+        <h1>Chapters</h1>
     </section>
     <!-- Main content -->
     <section class="content">
@@ -8,9 +8,9 @@
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header">
-                        <h3 class="box-title">List Posts</h3>
+                        <h3 class="box-title">List Chapters</h3>
                         <div class="pull-right">
-                            <a class="btn btn-block btn-primary" data-ui-sref="createPost">New</a>
+                            <a class="btn btn-block btn-primary" data-ui-sref="createChapter({postId: queryPostId})">New</a>
                         </div>
                     </div>
                     <!-- /.box-header -->
@@ -24,18 +24,6 @@
                                         <div class="form-group">
                                             <label class="control-label" for="keyword">Keyword</label>
                                             <input type="text" name="keyword" data-ng-model="search.keyword" id="keyword" class="form-control" placeholder="Enter keyword..." />
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label" for="category">Categories</label>
-                                            <select class="form-control" ng-change="filter()" data-ng-model="search.category" id="category" ng-options="category._id as category.name for category in categories.items">
-                                                <option value="">-- All category --</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label class="control-label" for="tags">Tags</label>
-                                            <select style="width: 150px;" ui-select2 class="form-control" ng-change="filter()" data-ng-model="search.tags" id="category" ng-options="item._id as item.name for item in tags.items">
-                                                <option value="">-- All tag --</option>
-                                            </select>
                                         </div>
                                         <div class="form-group">
                                             <label class="control-label" for="status">Status</label>
@@ -63,33 +51,27 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Tiêu đề</th>
-                                    <th>Thể loại</th>
                                     <th>Status</th>
-                                    <th>Người đăng</th>
                                     <th>Ngày tạo</th>
                                     <!-- <th>Created by</th> -->
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr data-ng-repeat="post in items | filter: query">
-                                    <td><a data-ui-sref="editPost({postId: post._id})">{{post._id}}</a></td>
-                                    <td>{{post.title}}</td>
+                                <tr data-ng-repeat="chapter in items | filter: query">
+                                    <td><a data-ui-sref="editChapter({chapterId: chapter._id, postId: queryPostId})">{{chapter._id}}</a></td>
+                                    <td>{{chapter.title}}</td>
+                                    <td><span class="label label-success" ng-if="chapter.status == 1">Công khai</span><span class="label label-danger" ng-if="chapter.status == 0">Không công khai</span></td>
+                                    <td>{{chapter.created | date:'hh:mm dd/MM/yyyy'}}</td>
+                                    <!-- <td>{{chapter.user.name}}</td> -->
                                     <td>
-                                        {{post.category.name}}
-                                    </td>
-                                    <td><span class="label label-success" ng-if="post.status == 1">Publish </span><span class="label label-danger" ng-if="post.status == 0">Unpublish </span></td>
-                                    <td>{{post.user.name}} <span class="label label-success" ng-if="post.user.is_seed == 1">Seed</span></td>
-                                    <td>{{post.created | date:'hh:mm dd/MM/yyyy'}}</td>
-                                    <!-- <td>{{post.user.name}}</td> -->
-                                    <td>
-                                        <a title="Link" href="{{webUrl}}/{{post.communityId.slug}}/chia-se-thao-luan/{{post.slug}}/{{post.shortId}}" target="_blank">
+                                        <!-- <a title="Link" href="{{webUrl}}/{{chapter.communityId.slug}}/chia-se-thao-luan/{{chapter.slug}}/{{chapter.shortId}}" target="_blank">
                                             <i class="glyphicon glyphicon-link"></i>
-                                        </a>
-                                        <a data-ui-sref="editPost({postId: post._id})" title="Edit">
+                                        </a> -->
+                                        <a data-ui-sref="editChapter({chapterId: chapter._id, postId: queryPostId})" title="Edit">
                                             <i class="glyphicon glyphicon-edit"></i>
                                         </a>
-                                        <a ng-click="remove(post._id)" title="Delete">
+                                        <a ng-click="remove(chapter._id)" title="Delete">
                                             <i class="glyphicon glyphicon-trash"></i>
                                         </a>
                                     </td>
@@ -98,7 +80,7 @@
                         </table>
                         <!-- <ul boundary-links="true" items-per-page="itemsPerPage" max-size="numberVisiblePages" uib-pagination total-items="totalItems" ng-model="currentPage" ng-change="pageChanged()" class="pagination-sm pull-right" previous-text="&lsaquo;" next-text="&rsaquo;"
                             first-text="&laquo;" last-text="&raquo;"></ul> -->
-                        <bd-pagination max-page="10" name="post_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged" />
+                        <bd-pagination max-page="10" name="chapter_page" current-page="currentPage" total-page="totalPage" page-changed="pageChanged" />
                     </div>
                     <!-- /.box-body -->
                 </div>
@@ -109,7 +91,7 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="alert alert-warning text-center" data-ng-hide="!items.$resolved || items.length">
-                    No Posts yet, why don't you <a data-ui-sref="createPost">create one</a>?
+                    No Chapters yet, why don't you <a data-ui-sref="createChapter">create one</a>?
                 </div>
             </div>
         </div>

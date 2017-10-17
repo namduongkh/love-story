@@ -110,7 +110,7 @@ exports.save = {
     validate: {
         payload: {
             title: Joi.string().required().description('Title'),
-            content: Joi.any().description('Content'),
+            description: Joi.any().description('Description'),
             status: Joi.number().required().description('Status'),
             slug: Joi.string().description('Slug'),
             category: Joi.any().description('Category'),
@@ -175,7 +175,7 @@ exports.update = {
     validate: {
         payload: {
             title: Joi.string().required().description('Title'),
-            content: Joi.any().description('Content'),
+            description: Joi.any().description('Description'),
             status: Joi.number().required().description('Status'),
             slug: Joi.string().description('Slug'),
             modified: Joi.date().required().description('Modified'),

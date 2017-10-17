@@ -19,10 +19,10 @@ angular.module('chapters')
     .service("ChapterSvc", function($window, $http) {
         return {
             uploadChapterContentImage: function(data) {
-                return $http.chapter($window.settings.services.apiUrl + '/api/upload/uploadChapterContentImage', data);
+                return $http.post($window.settings.services.apiUrl + '/api/upload/uploadChapterContentImage', data);
             },
             getImageFromContent: function(data) {
-                return $http.chapter($window.settings.services.apiUrl + '/api/chapter/getImageFromContent', data);
+                return $http.post($window.settings.services.apiUrl + '/api/chapter/getImageFromContent', data);
             }
         }
     });

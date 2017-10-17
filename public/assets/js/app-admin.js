@@ -550,455 +550,14 @@ angular.module('caches').factory('Caches', ['$resource',
 ]);
 'use strict';
 
-ApplicationConfiguration.registerModule('chapters');
-// Configuring the Articles module
-angular.module('chapters').run(['Menus',
-    function(Menus) {
-        // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Bài đăng', 'chapters', 'dropdown', '/chapters(/create)?');
-        Menus.addSubMenuItem('topbar', 'chapters', 'Danh sách bài đăng', 'chapters');
-        Menus.addSubMenuItem('topbar', 'chapters', 'Bài đăng mới', 'chapters/create');
-    }
-]).config(['$stateProvider',
-    function($stateProvider) {
-        // chapters state routing
-        $stateProvider
-            .state('listChapters', {
-                url: '/chapters',
-                templateUrl: '/modules/admin-chapter/views/list-chapters.client.view.html'
-            })
-            .state('createChapter', {
-                url: '/chapters/create',
-                templateUrl: '/modules/admin-chapter/views/create-chapter.client.view.html'
-            })
-            // .state('viewChapter', {
-            //     url: '/chapters/:chapterId',
-            //     templateUrl: '/modules/admin-chapter/views/view-chapter.client.view.html'
-            // })
-            .state('editChapter', {
-                url: '/chapters/:chapterId/edit',
-                templateUrl: '/modules/admin-chapter/views/edit-chapter.client.view.html'
-            });
-    }
-]);
-'use strict';
-
-// Chapters controller
-angular.module('chapters').controller('ChaptersController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Chapters', 'Categories', 'Notice', 'localStorageService', 'ChapterSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
-    function($scope, $stateParams, $location, $window, Option, Authentication, Chapters, Categories, Notice, localStorageService, ChapterSvc, Tags, Users, SearchSelectSvc, FileUploader) {
-
-        if (!Authentication.user.name) {
-            $location.path('signin');
-        }
-
-        $scope.apiUrl = $window.settings.services.apiUrl;
-
-        $scope.webUrl = $window.settings.services.webUrl;
-
-        $scope.statuses = Option.getStatus();
-
-        // $scope.features = Option.getFeatureChapter();
-
-        $scope.authentication = Authentication;
-
-        $scope.communities = {};
-
-        $scope.tags = {};
-
-        $scope.chaptersPath = '/files/chapters/';
-
-        $scope.isUploadImage = false;
-
-        $scope.isInvalidFile = false;
-
-        var uploader = $scope.uploader = new FileUploader({
-            url: $scope.apiUrl + '/api/upload/image',
-            formData: [{
-                type: 'chapters'
-            }],
-            autoUpload: true
-        });
-
-        // FILTERS
-        uploader.filters.push({
-            name: 'imageFilter',
-            fn: function(item /*{File|FileLikeObject}*/ , options) {
-                var type = '|' + item.type.slice(item.type.lastIndexOf('/') + 1) + '|';
-                return '|jpg|png|jpeg|bmp|gif|'.indexOf(type) !== -1;
-            }
-        });
-        // CALLBACKS
-        uploader.onWhenAddingFileFailed = function(item /*{File|FileLikeObject}*/ , filter, options) {
-            //console.info('onWhenAddingFileFailed', item, filter, options);
-        };
-        uploader.onBeforeUploadItem = function(item) {
-            $scope.$apply(function() {
-                $scope.isUploadImage = true;
-            });
-        };
-        uploader.onSuccessItem = function(fileItem, response, status, headers) {
-            $scope.review_image = $scope.webUrl + $scope.chaptersPath + response.file.filename;
-            if ($scope.chapter) {
-                $scope.chapter.image = response.file.filename;
-            } else {
-                $scope.image = response.file.filename;
-            }
-        };
-
-        uploader.onCompleteItem = function(fileItem, response, status, headers) {
-            $scope.$apply(function() {
-                $scope.isUploadImage = false;
-            });
-        };
-
-        $scope.tinymceOptions = {
-            plugins: "image",
-            file_picker_types: 'image',
-            file_picker_callback: function(cb, value, meta) {
-                var input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
-
-                // Note: In modern browsers input[type="file"] is functional without 
-                // even adding it to the DOM, but that might not be the case in some older
-                // or quirky browsers like IE, so you might want to add it to the DOM
-                // just in case, and visually hide it. And do not forget do remove it
-                // once you do not need it anymore.
-
-                input.onchange = function() {
-                    var file = this.files[0];
-
-                    var reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = function() {
-                        // Note: Now we need to register the blob in TinyMCEs image blob
-                        // registry. In the next release this part hopefully won't be
-                        // necessary, as we are looking to handle it internally.
-                        var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
-                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                        var base64 = reader.result.split(',')[1];
-                        var blobInfo = blobCache.create(id, file, base64);
-                        blobCache.add(blobInfo);
-
-                        // call the callback and populate the Title field with the file name
-                        cb(blobInfo.blobUri(), { title: file.name });
-                    };
-                };
-
-                input.click();
-            },
-            images_upload_handler: function(blobInfo, success, failure) {
-                var data = {
-                    file: blobInfo.base64(),
-                    name: blobInfo.filename()
-                }
-                ChapterSvc.uploadChapterContentImage(data)
-                    .then(resp => {
-                        if (resp.status == 200) {
-                            var path = $scope.webUrl + $scope.chaptersPath + resp.data.location;
-                            console.log({ path });
-                            success(path);
-                        }
-                    })
-            }
-        };
-
-        // Init chapter
-        $scope.tags = Tags.getList({}, function(result) {});
-        $scope.users = Users.query({
-            role: 'user',
-            page: 'all',
-            status: 1
-        }, function(resp) {});
-
-        $scope.gotoList = function() {
-            $location.path('chapters');
-        }
-
-        $scope.categories = Categories.query({});
-
-        // Create new Chapter
-        $scope.create = function(isValid, gotoList) {
-            $scope.submitted = true;
-            $scope.userError = false;
-            if (this.user == null) {
-                $scope.userError = "You did not select a field";
-                isValid = false;
-            }
-            if (!isValid) {
-                Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
-                return;
-            }
-            // Create new Chapter object
-            var chapter = new Chapters({
-                title: this.title,
-                slug: this.slug,
-                feature: this.feature,
-                // teaser: this.teaser,
-                image: this.image,
-                thumb: this.thumb,
-                content: this.content,
-                status: this.status,
-                category: this.category,
-                meta: this.meta,
-                communityId: this.community,
-                tags: this.tag,
-                user: this.user
-            });
-
-            // Redirect after save
-            chapter.$save(function(response) {
-
-                var data = {
-                    id: response._id
-                }
-                ChapterSvc.getImageFromContent(data).then(resp => {
-                    if (response.error) {
-                        Notice.setNotice(response.message, 'ERROR', true);
-                    } else {
-                        Notice.setNotice("Save chapter success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            $location.path('chapters/' + response._id + '/edit');
-                            // $scope.success = "Insert chapter success!";
-                            $scope.submitted = false;
-                            $scope.title = '';
-                        }
-                    }
-                });
-            }, function(errorResponse) {
-                Notice.setNotice(errorResponse.data.message, 'ERROR', true);
-            });
-        };
-
-        // Remove existing Chapter
-        $scope.remove = function(chapterId) {
-            if (confirm("Do you want to remove?")) {
-
-                var chapter = Chapters.get({
-                    chapterId: chapterId
-                });
-
-                chapter.$remove({
-                    chapterId: chapterId
-                });
-
-                for (var i in $scope.items) {
-                    if ($scope.items[i]._id == chapterId) {
-                        $scope.items.splice(i, 1);
-                    }
-                }
-
-                Notice.setNotice("Delete chapter success!", 'SUCCESS');
-
-                if ($stateParams.chapterId) {
-                    $scope.gotoList();
-                } else {
-                    Notice.requireChange();
-                }
-            }
-        };
-
-        // Update existing Chapter
-        $scope.update = function(isValid, gotoList) {
-            var gotoList = typeof gotoList !== 'undefined' ? gotoList : null;
-            $scope.submitted = true;
-            $scope.userError = null;
-            if ($scope.chapter.user == null) {
-                $scope.userError = "You did not select a field";
-                isValid = false;
-            }
-            if (!isValid) {
-                Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
-                return;
-            }
-            var chapter = $scope.chapter;
-            delete chapter.created;
-            delete chapter.__v;
-            chapter.$update(function(resp) {
-                //$location.path('chapters/' + chapter._id);
-                var data = { id: resp._id }
-                ChapterSvc.getImageFromContent(data).then(result => {
-                    if (resp.error) {
-                        Notice.setNotice(resp.message, 'ERROR', true);
-                    } else {
-                        Notice.setNotice("Update page success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            // $location.path('transactions/' + transaction._id);
-                            Notice.requireChange();
-                            $scope.submitted = false;
-                        }
-                    }
-                });
-            }, function(errorResponse) {
-                Notice.setNotice(errorResponse.data.message, 'ERROR', true);
-            });
-        };
-
-        // Find existing Chapter
-        $scope.findOne = function() {
-            $scope.chapter = Chapters.get({
-                chapterId: $stateParams.chapterId
-            }, function(resp) {
-                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'chapter' }, function(result) {
-                //     $scope.taglist = result;
-                // })
-                if ($scope.chapter.thumb) {
-                    $scope.review_thumb = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.thumb;
-                }
-                if ($scope.chapter.image) {
-                    $scope.review_image = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.image;
-                }
-                // if ($scope.chapter.user) {
-                //     SearchSelectSvc.updateNgModel($scope.chapter.user);
-                // }
-                $scope.render_select = true;
-            });
-        };
-
-
-        $scope.currentPage = 1;
-        $scope.search = {};
-
-        $scope.setPage = function(pageNo) {
-            $scope.currentPage = pageNo;
-        };
-
-        $scope.pageChanged = function(page) {
-            $scope.currentPage = page;
-            getListData();
-        };
-
-        function getListData() {
-            var options = {
-                page: $scope.currentPage,
-                keyword: $scope.search.keyword,
-                communityId: $scope.search.communityId,
-                category: $scope.search.category,
-                tags: $scope.search.tags,
-                status: $scope.search.status,
-                feature: $scope.search.feature
-            };
-            localStorageService.set('chapter.filterData', {
-                currentPage: $scope.currentPage,
-                search: $scope.search
-            });
-            Chapters.query(options, function(data) {
-                $scope.items = data.items;
-                $scope.totalItems = data.totalItems;
-                $scope.itemsPerPage = data.itemsPerPage;
-                $scope.numberVisiblePages = data.numberVisiblePages;
-                $scope.totalPage = data.totalPage || 1;
-
-            });
-        }
-
-        // Find a list of Chapters
-        $scope.find = function() {
-            if (!$.isEmptyObject($location.search())) {
-                var filterData = $location.search();
-                $scope.currentPage = Number(filterData.currentPage) || 1;
-                $scope.search.keyword = filterData.keyword;
-                $scope.search.category = filterData.category;
-                $scope.search.status = !isNaN(filterData.status) ? Number(filterData.status) : null;
-                $scope.search.feature = !isNaN(filterData.feature) ? Number(filterData.feature) : null;
-            } else {
-                var filterData = localStorageService.get('chapter.filterData');
-                if (filterData) {
-                    // console.log("filter by local store", filterData);
-                    $scope.currentPage = filterData.currentPage;
-                    $scope.search = filterData.search;
-                }
-            }
-            getListData();
-        };
-        //search
-        $scope.filter = function() {
-            $scope.currentPage = 1;
-            getListData();
-        };
-        //reset
-        $scope.reset = function() {
-            $scope.search = {};
-            $scope.currentPage = 1;
-            getListData();
-        };
-
-        // tag create
-        $scope.select2Options = {
-            tags: [],
-            multiple: true,
-            simple_tags: true,
-            createSearchChoice: function(term, data) {
-                if ($(data).filter(function() {
-                        return this.text.localeCompare(term) === 0;
-                    }).length === 0) {
-                    return { id: term, text: term };
-                }
-            }
-        };
-
-        // create slug
-        $scope.changeSlug = function(value, edit) {
-            var new_slug = slug(value).toLowerCase();
-            if (edit) {
-                $scope.chapter.slug = new_slug;
-            } else {
-                $scope.slug = new_slug;
-            }
-        };
-        //Sreach Chapterer
-        $scope.fetchDataSearch = function(keyword) {
-            Users.query({
-                keyword: keyword,
-                status: 1
-            }, function(data) {
-                $scope.dataSearch = data.items;
-            });
-        };
-    }
-]);
-'use strict';
-
-//Chapters service used to communicate Chapters REST endpoints
-angular.module('chapters').factory('Chapters', ['$resource',
-    function($resource) {
-        return $resource('chapter/:chapterId', {
-            chapterId: '@_id'
-        }, {
-            update: {
-                method: 'PUT'
-            },
-            query: {
-                isArray: false
-            }
-        });
-    }
-]);
-angular.module('chapters')
-    .service("ChapterSvc", ["$window", "$http", function($window, $http) {
-        return {
-            uploadChapterContentImage: function(data) {
-                return $http.chapter($window.settings.services.apiUrl + '/api/upload/uploadChapterContentImage', data);
-            },
-            getImageFromContent: function(data) {
-                return $http.chapter($window.settings.services.apiUrl + '/api/chapter/getImageFromContent', data);
-            }
-        }
-    }]);
-'use strict';
-
 ApplicationConfiguration.registerModule('categories');
 // Configuring the Articles module
 angular.module('categories').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Categories', 'categories', 'dropdown', '/categories(/create)?');
-        Menus.addSubMenuItem('topbar', 'categories', 'List Categories', 'categories');
-        Menus.addSubMenuItem('topbar', 'categories', 'New Category', 'categories/create');
+        Menus.addMenuItem('topbar', 'Thể loại', 'categories', 'dropdown', '/categories(/create)?');
+        Menus.addSubMenuItem('topbar', 'categories', 'Danh sách', 'categories');
+        Menus.addSubMenuItem('topbar', 'categories', 'Thể loại mới', 'categories/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {
@@ -1248,6 +807,586 @@ angular.module('categories').factory('Categories', ['$resource',
         });
     }
 ]);
+'use strict';
+
+ApplicationConfiguration.registerModule('chapters');
+// Configuring the Articles module
+angular.module('chapters').run(['Menus',
+    function(Menus) {
+        // Set top bar menu items
+        // Menus.addMenuItem('topbar', 'Tập truyện', 'chapters', 'dropdown', '/chapters(/create)?');
+        // Menus.addSubMenuItem('topbar', 'chapters', 'Danh sách', 'chapters');
+        // Menus.addSubMenuItem('topbar', 'chapters', 'Tập truyện mới', 'chapters/create');
+    }
+]).config(['$stateProvider',
+    function($stateProvider) {
+        // chapters state routing
+        $stateProvider
+            .state('listChapters', {
+                url: '/chapters?:postId',
+                templateUrl: '/modules/admin-chapter/views/list-chapters.client.view.html'
+            })
+            .state('createChapter', {
+                url: '/chapters/create?:postId',
+                templateUrl: '/modules/admin-chapter/views/create-chapter.client.view.html'
+            })
+            // .state('viewChapter', {
+            //     url: '/chapters/:chapterId',
+            //     templateUrl: '/modules/admin-chapter/views/view-chapter.client.view.html'
+            // })
+            .state('editChapter', {
+                url: '/chapters/:chapterId/edit?:postId',
+                templateUrl: '/modules/admin-chapter/views/edit-chapter.client.view.html'
+            });
+    }
+]);
+'use strict';
+
+// Chapters controller
+angular.module('chapters').controller('ChaptersController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Chapters', 'Categories', 'Notice', 'localStorageService', 'ChapterSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader', 'Posts', '$state',
+    function($scope, $stateParams, $location, $window, Option, Authentication, Chapters, Categories, Notice, localStorageService, ChapterSvc, Tags, Users, SearchSelectSvc, FileUploader, Posts, $state) {
+
+        if ($location.search().postId) {
+            $scope.postIds = Posts.query({});
+            $scope.queryPostId = $location.search().postId;
+            $scope.postId = $scope.queryPostId;
+            if ($scope.post) {
+                $scope.post.postId = $scope.queryPostId;
+            }
+        } else {
+            $state.go("listPosts");
+        }
+
+        if (!Authentication.user.name) {
+            $location.path('signin');
+        }
+
+        $scope.chaptersPath = '/files/chapters/';
+
+        $scope.apiUrl = $window.settings.services.apiUrl;
+
+        $scope.webUrl = $window.settings.services.webUrl;
+
+        $scope.statuses = Option.getStatus();
+
+        $scope.authentication = Authentication;
+
+        $scope.tinymceOptions = {
+            plugins: "image",
+            file_picker_types: 'image',
+            file_picker_callback: function(cb, value, meta) {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', 'image/*');
+
+                // Note: In modern browsers input[type="file"] is functional without 
+                // even adding it to the DOM, but that might not be the case in some older
+                // or quirky browsers like IE, so you might want to add it to the DOM
+                // just in case, and visually hide it. And do not forget do remove it
+                // once you do not need it anymore.
+
+                input.onchange = function() {
+                    var file = this.files[0];
+
+                    var reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = function() {
+                        // Note: Now we need to register the blob in TinyMCEs image blob
+                        // registry. In the next release this part hopefully won't be
+                        // necessary, as we are looking to handle it internally.
+                        var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
+                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+                        var base64 = reader.result.split(',')[1];
+                        var blobInfo = blobCache.create(id, file, base64);
+                        blobCache.add(blobInfo);
+
+                        // call the callback and populate the Title field with the file name
+                        cb(blobInfo.blobUri(), { title: file.name });
+                    };
+                };
+
+                input.click();
+            },
+            images_upload_handler: function(blobInfo, success, failure) {
+                var data = {
+                    file: blobInfo.base64(),
+                    name: blobInfo.filename()
+                }
+                ChapterSvc.uploadChapterContentImage(data)
+                    .then(resp => {
+                        if (resp.status == 200) {
+                            var path = $scope.webUrl + $scope.chaptersPath + resp.data.location;
+                            console.log({ path })
+                            success(path);
+                        }
+                    })
+            }
+        };
+
+        $scope.gotoList = function() {
+            // $location.path('chapters');
+            $state.go("listChapters", { postId: $scope.queryPostId });
+        }
+
+        // Create new Chapter
+        $scope.create = function(isValid, gotoList) {
+            $scope.submitted = true;
+            if (!isValid) {
+                Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
+                return;
+            }
+            // Create new Chapter object
+            var chapter = new Chapters({
+                title: this.title,
+                slug: this.slug,
+                content: this.content,
+                status: this.status,
+                meta: this.meta,
+                postId: this.postId,
+            });
+
+            // Redirect after save
+            chapter.$save(function(response) {
+                // var data = { id: response._id };
+                // ChapterSvc.getImageFromContent(data).then(resp => {
+                if (response.error) {
+                    Notice.setNotice(response.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Save chapter success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
+                    } else {
+                        // $location.path('chapters/' + response._id + '/edit');
+                        // $scope.success = "Insert chapter success!";
+                        $state.go("editChapters", { postId: $scope.queryPostId });
+                        $scope.submitted = false;
+                        Notice.requireChange();
+                    }
+                }
+                // });
+            }, function(errorResponse) {
+                Notice.setNotice(errorResponse.data.message, 'ERROR', true);
+            });
+        };
+
+        // Remove existing Chapter
+        $scope.remove = function(chapterId) {
+            if (confirm("Do you want to remove?")) {
+
+                var chapter = Chapters.get({
+                    chapterId: chapterId
+                });
+
+                chapter.$remove({
+                    chapterId: chapterId
+                });
+
+                for (var i in $scope.items) {
+                    if ($scope.items[i]._id == chapterId) {
+                        $scope.items.splice(i, 1);
+                    }
+                }
+
+                Notice.setNotice("Delete chapter success!", 'SUCCESS');
+
+                if ($stateParams.chapterId) {
+                    $scope.gotoList();
+                } else {
+                    Notice.requireChange();
+                }
+            }
+        };
+
+        // Update existing Chapter
+        $scope.update = function(isValid, gotoList) {
+            var gotoList = typeof gotoList !== 'undefined' ? gotoList : null;
+            $scope.submitted = true;
+            if (!isValid) {
+                Notice.setNotice("Please check your fields and try again!", 'ERROR', true);
+                return;
+            }
+            var chapter = $scope.chapter;
+            delete chapter.created;
+            delete chapter.__v;
+            chapter.$update(function(resp) {
+                //$location.path('chapters/' + chapter._id);
+                // var data = { id: resp._id }
+                // ChapterSvc.getImageFromContent(data).then(result => {
+                if (resp.error) {
+                    Notice.setNotice(resp.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Update page success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
+                    } else {
+                        // $location.path('transactions/' + transaction._id);
+                        Notice.requireChange();
+                        $scope.submitted = false;
+                    }
+                }
+                // });
+            }, function(errorResponse) {
+                Notice.setNotice(errorResponse.data.message, 'ERROR', true);
+            });
+        };
+
+        // Find existing Chapter
+        $scope.findOne = function() {
+            $scope.chapter = Chapters.get({
+                chapterId: $stateParams.chapterId
+            }, function(resp) {
+                // Tags.query({ communityId: resp.communityId, status: 1, getList: 'true', type: 'chapter' }, function(result) {
+                //     $scope.taglist = result;
+                // })
+                if ($scope.chapter.thumb) {
+                    $scope.review_thumb = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.thumb;
+                }
+                if ($scope.chapter.image) {
+                    $scope.review_image = $scope.webUrl + $scope.chaptersPath + resp._id + '/' + $scope.chapter.image;
+                }
+                // if ($scope.chapter.user) {
+                //     SearchSelectSvc.updateNgModel($scope.chapter.user);
+                // }
+                $scope.render_select = true;
+            });
+        };
+
+
+        $scope.currentPage = 1;
+        $scope.search = {};
+
+        $scope.setPage = function(pageNo) {
+            $scope.currentPage = pageNo;
+        };
+
+        $scope.pageChanged = function(page) {
+            $scope.currentPage = page;
+            getListData();
+        };
+
+        function getListData() {
+            var options = {
+                page: $scope.currentPage,
+                keyword: $scope.search.keyword,
+                communityId: $scope.search.communityId,
+                category: $scope.search.category,
+                tags: $scope.search.tags,
+                status: $scope.search.status,
+                feature: $scope.search.feature
+            };
+            localStorageService.set('chapter.filterData', {
+                currentPage: $scope.currentPage,
+                search: $scope.search
+            });
+            Chapters.query(options, function(data) {
+                $scope.items = data.items;
+                $scope.totalItems = data.totalItems;
+                $scope.itemsPerPage = data.itemsPerPage;
+                $scope.numberVisiblePages = data.numberVisiblePages;
+                $scope.totalPage = data.totalPage || 1;
+
+            });
+        }
+
+        // Find a list of Chapters
+        $scope.find = function() {
+            if (!$.isEmptyObject($location.search())) {
+                var filterData = $location.search();
+                $scope.currentPage = Number(filterData.currentPage) || 1;
+                $scope.search.keyword = filterData.keyword;
+                $scope.search.category = filterData.category;
+                $scope.search.status = !isNaN(filterData.status) ? Number(filterData.status) : null;
+                $scope.search.feature = !isNaN(filterData.feature) ? Number(filterData.feature) : null;
+            } else {
+                var filterData = localStorageService.get('chapter.filterData');
+                if (filterData) {
+                    // console.log("filter by local store", filterData);
+                    $scope.currentPage = filterData.currentPage;
+                    $scope.search = filterData.search;
+                }
+            }
+            getListData();
+        };
+        //search
+        $scope.filter = function() {
+            $scope.currentPage = 1;
+            getListData();
+        };
+        //reset
+        $scope.reset = function() {
+            $scope.search = {};
+            $scope.currentPage = 1;
+            getListData();
+        };
+
+        // tag create
+        $scope.select2Options = {
+            tags: [],
+            multiple: true,
+            simple_tags: true,
+            createSearchChoice: function(term, data) {
+                if ($(data).filter(function() {
+                        return this.text.localeCompare(term) === 0;
+                    }).length === 0) {
+                    return { id: term, text: term };
+                }
+            }
+        };
+
+        // create slug
+        $scope.changeSlug = function(value, edit) {
+            var new_slug = slug(value).toLowerCase();
+            if (edit) {
+                $scope.chapter.slug = new_slug;
+            } else {
+                $scope.slug = new_slug;
+            }
+        };
+    }
+]);
+'use strict';
+
+//Chapters service used to communicate Chapters REST endpoints
+angular.module('chapters').factory('Chapters', ['$resource',
+    function($resource) {
+        return $resource('chapter/:chapterId', {
+            chapterId: '@_id'
+        }, {
+            update: {
+                method: 'PUT'
+            },
+            query: {
+                isArray: false
+            }
+        });
+    }
+]);
+angular.module('chapters')
+    .service("ChapterSvc", ["$window", "$http", function($window, $http) {
+        return {
+            uploadChapterContentImage: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/upload/uploadChapterContentImage', data);
+            },
+            getImageFromContent: function(data) {
+                return $http.post($window.settings.services.apiUrl + '/api/chapter/getImageFromContent', data);
+            }
+        }
+    }]);
+/**
+ * Enhanced Select2 Dropmenus
+ *
+ * @AJAX Mode - When in this mode, your value will be an object (or array of objects) of the data used by Select2
+ *     This change is so that you do not have to do an additional query yourself on top of Select2's own query
+ * @params [options] {object} The configuration options passed to $.fn.select2(). Refer to the documentation
+ */
+angular.module('ui.select2', []).value('uiSelect2Config', {}).directive('uiSelect2', ['uiSelect2Config', '$timeout', function(uiSelect2Config, $timeout) {
+    var options = {};
+    if (uiSelect2Config) {
+        angular.extend(options, uiSelect2Config);
+    }
+    return {
+        require: 'ngModel',
+        priority: 1,
+        compile: function(tElm, tAttrs) {
+            var watch,
+                repeatOption,
+                repeatAttr,
+                isSelect = tElm.is('select'),
+                isMultiple = angular.isDefined(tAttrs.multiple);
+
+            // Enable watching of the options dataset if in use
+            if (tElm.is('select')) {
+                repeatOption = tElm.find('option[ng-repeat], option[data-ng-repeat]');
+
+                if (repeatOption.length) {
+                    repeatAttr = repeatOption.attr('ng-repeat') || repeatOption.attr('data-ng-repeat');
+                    watch = jQuery.trim(repeatAttr.split('|')[0]).split(' ').pop();
+                }
+            }
+
+            return function(scope, elm, attrs, controller) {
+                // instance-specific options
+                var opts = angular.extend({}, options, scope.$eval(attrs.uiSelect2));
+
+                /*
+                Convert from Select2 view-model to Angular view-model.
+                */
+                var convertToAngularModel = function(select2_data) {
+                    var model;
+                    if (opts.simple_tags) {
+                        model = [];
+                        angular.forEach(select2_data, function(value, index) {
+                            model.push(value.id);
+                        });
+                    } else {
+                        model = select2_data;
+                    }
+                    return model;
+                };
+
+                /*
+                Convert from Angular view-model to Select2 view-model.
+                */
+                var convertToSelect2Model = function(angular_data) {
+                    var model = [];
+                    if (!angular_data) {
+                        return model;
+                    }
+
+                    if (opts.simple_tags) {
+                        model = [];
+                        angular.forEach(
+                            angular_data,
+                            function(value, index) {
+                                model.push({ 'id': value, 'text': value });
+                            });
+                    } else {
+                        model = angular_data;
+                    }
+                    return model;
+                };
+
+                if (isSelect) {
+                    // Use <select multiple> instead
+                    delete opts.multiple;
+                    delete opts.initSelection;
+                } else if (isMultiple) {
+                    opts.multiple = true;
+                }
+
+                if (controller) {
+                    // Watch the model for programmatic changes
+                    scope.$watch(tAttrs.ngModel, function(current, old) {
+                        if (!current) {
+                            return;
+                        }
+                        if (current === old) {
+                            return;
+                        }
+                        controller.$render();
+                    }, true);
+                    controller.$render = function() {
+                        if (isSelect) {
+                            elm.select2('val', controller.$viewValue);
+                        } else {
+                            if (opts.multiple) {
+                                var viewValue = controller.$viewValue;
+                                if (angular.isString(viewValue)) {
+                                    viewValue = viewValue.split(',');
+                                }
+                                elm.select2('data', convertToSelect2Model(viewValue));
+                            } else {
+                                if (angular.isObject(controller.$viewValue)) {
+                                    elm.select2('data', controller.$viewValue);
+                                } else if (!controller.$viewValue) {
+                                    elm.select2('data', null);
+                                } else {
+                                    elm.select2('val', controller.$viewValue);
+                                }
+                            }
+                        }
+                    };
+
+                    // Watch the options dataset for changes
+                    if (watch) {
+                        scope.$watch(watch, function(newVal, oldVal, scope) {
+                            if (angular.equals(newVal, oldVal)) {
+                                return;
+                            }
+                            // Delayed so that the options have time to be rendered
+                            $timeout(function() {
+                                elm.select2('val', controller.$viewValue);
+                                // Refresh angular to remove the superfluous option
+                                elm.trigger('change');
+                                if (newVal && !oldVal && controller.$setPristine) {
+                                    controller.$setPristine(true);
+                                }
+                            });
+                        });
+                    }
+
+                    // Update valid and dirty statuses
+                    controller.$parsers.push(function(value) {
+                        var div = elm.prev();
+                        div
+                            .toggleClass('ng-invalid', !controller.$valid)
+                            .toggleClass('ng-valid', controller.$valid)
+                            .toggleClass('ng-invalid-required', !controller.$valid)
+                            .toggleClass('ng-valid-required', controller.$valid)
+                            .toggleClass('ng-dirty', controller.$dirty)
+                            .toggleClass('ng-pristine', controller.$pristine);
+                        return value;
+                    });
+
+                    if (!isSelect) {
+                        // Set the view and model value and update the angular template manually for the ajax/multiple select2.
+                        elm.bind("change", function(e) {
+                            e.stopImmediatePropagation();
+
+                            if (scope.$$phase || scope.$root.$$phase) {
+                                return;
+                            }
+                            scope.$apply(function() {
+                                controller.$setViewValue(
+                                    convertToAngularModel(elm.select2('data')));
+                            });
+                        });
+
+                        if (opts.initSelection) {
+                            var initSelection = opts.initSelection;
+                            opts.initSelection = function(element, callback) {
+                                initSelection(element, function(value) {
+                                    controller.$setViewValue(convertToAngularModel(value));
+                                    callback(value);
+                                });
+                            };
+                        }
+                    }
+                }
+
+                elm.ready(function() {
+                    elm.bind("$destroy", function() {
+                        try {
+                            elm.select2("destroy");
+                        } catch (e) {}
+                    });
+                });
+
+                attrs.$observe('disabled', function(value) {
+                    elm.select2('enable', !value);
+                });
+
+                attrs.$observe('readonly', function(value) {
+                    elm.select2('readonly', !!value);
+                });
+
+                if (attrs.ngMultiple) {
+                    scope.$watch(attrs.ngMultiple, function(newVal) {
+                        attrs.$set('multiple', !!newVal);
+                        elm.select2(opts);
+                    });
+                }
+
+                // Initialize the plugin late so that the injected DOM does not disrupt the template compiler
+                $timeout(function() {
+                    elm.select2(opts);
+
+                    // Set initial value - I'm not sure about this but it seems to need to be there
+                    elm.val(controller.$viewValue);
+                    // important!
+                    controller.$render();
+
+                    // Not sure if I should just check for !isSelect OR if I should check for 'tags' key
+                    if (!opts.initSelection && !isSelect) {
+                        controller.$setViewValue(
+                            convertToAngularModel(elm.select2('data'))
+                        );
+                    }
+                });
+            };
+        }
+    };
+}]);
 angular.module('core').directive('ckEditor', [function () {
 	return {
 		require: '?ngModel',
@@ -1532,17 +1671,17 @@ angular.module('core').controller('HomeController', ['$scope', '$location', 'Aut
  */
 angular.module('core').factory("Option", ["$rootScope", function($rootScope) {
 
-    var statuses = [{ name: "Publish", value: 1 }, { 'name': "Unpublish", value: 0 }];
+    var statuses = [{ name: "Công khai", value: 1 }, { 'name': "Không công khai", value: 0 }];
 
-    var tag_statuses = [{ name: "Publish", value: 1 }, { name: "Unpublish", value: 0 }];
+    var tag_statuses = [{ name: "Công khai", value: 1 }, { name: "Không công khai", value: 0 }];
 
-    var features = [{ name: "Yes", value: 1 }, { 'name': "No", value: 0 }];
+    var features = [{ name: "Có", value: 1 }, { 'name': "Không", value: 0 }];
 
-    var yesno = [{ name: "Yes", value: 1 }, { 'name': "No", value: 0 }];
+    var yesno = [{ name: "Có", value: 1 }, { 'name': "Không", value: 0 }];
 
     var roles = [{ name: "Admin", value: 'admin' }, { 'name': "User", value: 'user' }];
 
-    var genders = [{ name: 'male', value: 'male' }, { name: 'female', value: 'female' }];
+    var genders = [{ name: 'Nam', value: 'male' }, { name: 'Nữ', value: 'female' }];
 
     var types = [{ name: 'Product', value: 'product' }, { name: 'Post', value: 'post' }, { name: 'Banner', value: 'banner' }];
 
@@ -1840,7 +1979,7 @@ angular.module('pages').run(['Menus',
         // Set top bar menu items
         Menus.addMenuItem('topbar', 'Trang', 'pages', 'dropdown', '/pages(/create)?');
         Menus.addSubMenuItem('topbar', 'pages', 'Danh sách', 'pages');
-        Menus.addSubMenuItem('topbar', 'pages', 'Tạo mới', 'pages/create');
+        Menus.addSubMenuItem('topbar', 'pages', 'Trang mới', 'pages/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {
@@ -2074,9 +2213,9 @@ ApplicationConfiguration.registerModule('posts');
 angular.module('posts').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Bài đăng', 'posts', 'dropdown', '/posts(/create)?');
-        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách bài đăng', 'posts');
-        Menus.addSubMenuItem('topbar', 'posts', 'Bài đăng mới', 'posts/create');
+        Menus.addMenuItem('topbar', 'Bộ truyện', 'posts', 'dropdown', '/posts(/create)?');
+        Menus.addSubMenuItem('topbar', 'posts', 'Danh sách', 'posts');
+        Menus.addSubMenuItem('topbar', 'posts', 'Bộ truyện mới', 'posts/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {
@@ -2103,8 +2242,8 @@ angular.module('posts').run(['Menus',
 'use strict';
 
 // Posts controller
-angular.module('posts').controller('PostsController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Posts', 'Categories', 'Notice', 'localStorageService', 'PostSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
-    function($scope, $stateParams, $location, $window, Option, Authentication, Posts, Categories, Notice, localStorageService, PostSvc, Tags, Users, SearchSelectSvc, FileUploader) {
+angular.module('posts').controller('PostsController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Posts', 'Categories', 'Notice', 'localStorageService', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
+    function($scope, $stateParams, $location, $window, Option, Authentication, Posts, Categories, Notice, localStorageService, Tags, Users, SearchSelectSvc, FileUploader) {
 
         if (!Authentication.user.name) {
             $location.path('signin');
@@ -2123,8 +2262,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         $scope.communities = {};
 
         $scope.tags = {};
-
-        $scope.postsPath = '/files/posts/';
 
         $scope.isUploadImage = false;
 
@@ -2171,55 +2308,55 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         $scope.tinymceOptions = {
-            plugins: "image",
-            file_picker_types: 'image',
-            file_picker_callback: function(cb, value, meta) {
-                var input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
+            // plugins: "image",
+            // file_picker_types: 'image',
+            // file_picker_callback: function(cb, value, meta) {
+            //     var input = document.createElement('input');
+            //     input.setAttribute('type', 'file');
+            //     input.setAttribute('accept', 'image/*');
 
-                // Note: In modern browsers input[type="file"] is functional without 
-                // even adding it to the DOM, but that might not be the case in some older
-                // or quirky browsers like IE, so you might want to add it to the DOM
-                // just in case, and visually hide it. And do not forget do remove it
-                // once you do not need it anymore.
+            //     // Note: In modern browsers input[type="file"] is functional without 
+            //     // even adding it to the DOM, but that might not be the case in some older
+            //     // or quirky browsers like IE, so you might want to add it to the DOM
+            //     // just in case, and visually hide it. And do not forget do remove it
+            //     // once you do not need it anymore.
 
-                input.onchange = function() {
-                    var file = this.files[0];
+            //     input.onchange = function() {
+            //         var file = this.files[0];
 
-                    var reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = function() {
-                        // Note: Now we need to register the blob in TinyMCEs image blob
-                        // registry. In the next release this part hopefully won't be
-                        // necessary, as we are looking to handle it internally.
-                        var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
-                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                        var base64 = reader.result.split(',')[1];
-                        var blobInfo = blobCache.create(id, file, base64);
-                        blobCache.add(blobInfo);
+            //         var reader = new FileReader();
+            //         reader.readAsDataURL(file);
+            //         reader.onload = function() {
+            //             // Note: Now we need to register the blob in TinyMCEs image blob
+            //             // registry. In the next release this part hopefully won't be
+            //             // necessary, as we are looking to handle it internally.
+            //             var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
+            //             var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+            //             var base64 = reader.result.split(',')[1];
+            //             var blobInfo = blobCache.create(id, file, base64);
+            //             blobCache.add(blobInfo);
 
-                        // call the callback and populate the Title field with the file name
-                        cb(blobInfo.blobUri(), { title: file.name });
-                    };
-                };
+            //             // call the callback and populate the Title field with the file name
+            //             cb(blobInfo.blobUri(), { title: file.name });
+            //         };
+            //     };
 
-                input.click();
-            },
-            images_upload_handler: function(blobInfo, success, failure) {
-                var data = {
-                    file: blobInfo.base64(),
-                    name: blobInfo.filename()
-                }
-                PostSvc.uploadPostContentImage(data)
-                    .then(resp => {
-                        if (resp.status == 200) {
-                            var path = $scope.webUrl + $scope.postsPath + resp.data.location;
-                            console.log({ path });
-                            success(path);
-                        }
-                    })
-            }
+            //     input.click();
+            // },
+            // images_upload_handler: function(blobInfo, success, failure) {
+            //     var data = {
+            //         file: blobInfo.base64(),
+            //         name: blobInfo.filename()
+            //     }
+            //     PostSvc.uploadPostContentImage(data)
+            //         .then(resp => {
+            //             if (resp.status == 200) {
+            //                 var path = $scope.webUrl + $scope.postsPath + resp.data.location;
+            //                 console.log({ path });
+            //                 success(path);
+            //             }
+            //         })
+            // }
         };
 
         // Init post
@@ -2256,7 +2393,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 // teaser: this.teaser,
                 image: this.image,
                 thumb: this.thumb,
-                content: this.content,
+                description: this.description,
                 status: this.status,
                 category: this.category,
                 meta: this.meta,
@@ -2269,23 +2406,23 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             post.$save(function(response) {
 
                 var data = {
-                    id: response._id
-                }
-                PostSvc.getImageFromContent(data).then(resp => {
-                    if (response.error) {
-                        Notice.setNotice(response.message, 'ERROR', true);
-                    } else {
-                        Notice.setNotice("Save post success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            $location.path('posts/' + response._id + '/edit');
-                            // $scope.success = "Insert post success!";
-                            $scope.submitted = false;
-                            $scope.title = '';
-                        }
+                        id: response._id
                     }
-                });
+                    // PostSvc.getImageFromContent(data).then(resp => {
+                if (response.error) {
+                    Notice.setNotice(response.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Save post success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
+                    } else {
+                        $location.path('posts/' + response._id + '/edit');
+                        // $scope.success = "Insert post success!";
+                        $scope.submitted = false;
+                        $scope.title = '';
+                    }
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });
@@ -2338,20 +2475,20 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             post.$update(function(resp) {
                 //$location.path('posts/' + post._id);
                 var data = { id: resp._id }
-                PostSvc.getImageFromContent(data).then(result => {
-                    if (resp.error) {
-                        Notice.setNotice(resp.message, 'ERROR', true);
+                    // PostSvc.getImageFromContent(data).then(result => {
+                if (resp.error) {
+                    Notice.setNotice(resp.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Update post success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
                     } else {
-                        Notice.setNotice("Update page success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            // $location.path('transactions/' + transaction._id);
-                            Notice.requireChange();
-                            $scope.submitted = false;
-                        }
+                        // $location.path('transactions/' + transaction._id);
+                        Notice.requireChange();
+                        $scope.submitted = false;
                     }
-                });
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });
@@ -2497,17 +2634,17 @@ angular.module('posts').factory('Posts', ['$resource',
         });
     }
 ]);
-angular.module('posts')
-    .service("PostSvc", ["$window", "$http", function($window, $http) {
-        return {
-            uploadPostContentImage: function(data) {
-                return $http.post($window.settings.services.apiUrl + '/api/upload/uploadPostContentImage', data);
-            },
-            getImageFromContent: function(data) {
-                return $http.post($window.settings.services.apiUrl + '/api/post/getImageFromContent', data);
-            }
-        }
-    }]);
+// angular.module('posts')
+//     .service("PostSvc", function($window, $http) {
+//         return {
+//             uploadPostContentImage: function(data) {
+//                 return $http.post($window.settings.services.apiUrl + '/api/upload/uploadPostContentImage', data);
+//             },
+//             getImageFromContent: function(data) {
+//                 return $http.post($window.settings.services.apiUrl + '/api/post/getImageFromContent', data);
+//             }
+//         }
+//     });
 'use strict';
 
 ApplicationConfiguration.registerModule('tag');
@@ -2877,9 +3014,9 @@ ApplicationConfiguration.registerModule('users');
 angular.module('users').run(['Menus',
     function(Menus) {
         // Set top bar menu items
-        Menus.addMenuItem('topbar', 'Users', 'users', 'dropdown', '/users(/create)?');
-        Menus.addSubMenuItem('topbar', 'users', 'List Users', 'users');
-        Menus.addSubMenuItem('topbar', 'users', 'New User', 'users/create');
+        Menus.addMenuItem('topbar', 'Người dùng', 'users', 'dropdown', '/users(/create)?');
+        Menus.addSubMenuItem('topbar', 'users', 'Danh sách', 'users');
+        Menus.addSubMenuItem('topbar', 'users', 'Người dùng mới', 'users/create');
     }
 ]).config(['$stateProvider',
     function($stateProvider) {

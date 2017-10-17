@@ -1,8 +1,8 @@
 'use strict';
 
 // Posts controller
-angular.module('posts').controller('PostsController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Posts', 'Categories', 'Notice', 'localStorageService', 'PostSvc', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
-    function($scope, $stateParams, $location, $window, Option, Authentication, Posts, Categories, Notice, localStorageService, PostSvc, Tags, Users, SearchSelectSvc, FileUploader) {
+angular.module('posts').controller('PostsController', ['$scope', '$stateParams', '$location', '$window', 'Option', 'Authentication', 'Posts', 'Categories', 'Notice', 'localStorageService', 'Tags', 'Users', 'SearchSelectSvc', 'FileUploader',
+    function($scope, $stateParams, $location, $window, Option, Authentication, Posts, Categories, Notice, localStorageService, Tags, Users, SearchSelectSvc, FileUploader) {
 
         if (!Authentication.user.name) {
             $location.path('signin');
@@ -21,8 +21,6 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         $scope.communities = {};
 
         $scope.tags = {};
-
-        $scope.postsPath = '/files/posts/';
 
         $scope.isUploadImage = false;
 
@@ -69,55 +67,55 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
         };
 
         $scope.tinymceOptions = {
-            plugins: "image",
-            file_picker_types: 'image',
-            file_picker_callback: function(cb, value, meta) {
-                var input = document.createElement('input');
-                input.setAttribute('type', 'file');
-                input.setAttribute('accept', 'image/*');
+            // plugins: "image",
+            // file_picker_types: 'image',
+            // file_picker_callback: function(cb, value, meta) {
+            //     var input = document.createElement('input');
+            //     input.setAttribute('type', 'file');
+            //     input.setAttribute('accept', 'image/*');
 
-                // Note: In modern browsers input[type="file"] is functional without 
-                // even adding it to the DOM, but that might not be the case in some older
-                // or quirky browsers like IE, so you might want to add it to the DOM
-                // just in case, and visually hide it. And do not forget do remove it
-                // once you do not need it anymore.
+            //     // Note: In modern browsers input[type="file"] is functional without 
+            //     // even adding it to the DOM, but that might not be the case in some older
+            //     // or quirky browsers like IE, so you might want to add it to the DOM
+            //     // just in case, and visually hide it. And do not forget do remove it
+            //     // once you do not need it anymore.
 
-                input.onchange = function() {
-                    var file = this.files[0];
+            //     input.onchange = function() {
+            //         var file = this.files[0];
 
-                    var reader = new FileReader();
-                    reader.readAsDataURL(file);
-                    reader.onload = function() {
-                        // Note: Now we need to register the blob in TinyMCEs image blob
-                        // registry. In the next release this part hopefully won't be
-                        // necessary, as we are looking to handle it internally.
-                        var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
-                        var blobCache = tinymce.activeEditor.editorUpload.blobCache;
-                        var base64 = reader.result.split(',')[1];
-                        var blobInfo = blobCache.create(id, file, base64);
-                        blobCache.add(blobInfo);
+            //         var reader = new FileReader();
+            //         reader.readAsDataURL(file);
+            //         reader.onload = function() {
+            //             // Note: Now we need to register the blob in TinyMCEs image blob
+            //             // registry. In the next release this part hopefully won't be
+            //             // necessary, as we are looking to handle it internally.
+            //             var id = file.name.substring(0, file.name.lastIndexOf('.')) + '_' + (new Date()).getTime();
+            //             var blobCache = tinymce.activeEditor.editorUpload.blobCache;
+            //             var base64 = reader.result.split(',')[1];
+            //             var blobInfo = blobCache.create(id, file, base64);
+            //             blobCache.add(blobInfo);
 
-                        // call the callback and populate the Title field with the file name
-                        cb(blobInfo.blobUri(), { title: file.name });
-                    };
-                };
+            //             // call the callback and populate the Title field with the file name
+            //             cb(blobInfo.blobUri(), { title: file.name });
+            //         };
+            //     };
 
-                input.click();
-            },
-            images_upload_handler: function(blobInfo, success, failure) {
-                var data = {
-                    file: blobInfo.base64(),
-                    name: blobInfo.filename()
-                }
-                PostSvc.uploadPostContentImage(data)
-                    .then(resp => {
-                        if (resp.status == 200) {
-                            var path = $scope.webUrl + $scope.postsPath + resp.data.location;
-                            console.log({ path });
-                            success(path);
-                        }
-                    })
-            }
+            //     input.click();
+            // },
+            // images_upload_handler: function(blobInfo, success, failure) {
+            //     var data = {
+            //         file: blobInfo.base64(),
+            //         name: blobInfo.filename()
+            //     }
+            //     PostSvc.uploadPostContentImage(data)
+            //         .then(resp => {
+            //             if (resp.status == 200) {
+            //                 var path = $scope.webUrl + $scope.postsPath + resp.data.location;
+            //                 console.log({ path });
+            //                 success(path);
+            //             }
+            //         })
+            // }
         };
 
         // Init post
@@ -154,7 +152,7 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 // teaser: this.teaser,
                 image: this.image,
                 thumb: this.thumb,
-                content: this.content,
+                description: this.description,
                 status: this.status,
                 category: this.category,
                 meta: this.meta,
@@ -167,23 +165,23 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             post.$save(function(response) {
 
                 var data = {
-                    id: response._id
-                }
-                PostSvc.getImageFromContent(data).then(resp => {
-                    if (response.error) {
-                        Notice.setNotice(response.message, 'ERROR', true);
-                    } else {
-                        Notice.setNotice("Save post success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            $location.path('posts/' + response._id + '/edit');
-                            // $scope.success = "Insert post success!";
-                            $scope.submitted = false;
-                            $scope.title = '';
-                        }
+                        id: response._id
                     }
-                });
+                    // PostSvc.getImageFromContent(data).then(resp => {
+                if (response.error) {
+                    Notice.setNotice(response.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Save post success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
+                    } else {
+                        $location.path('posts/' + response._id + '/edit');
+                        // $scope.success = "Insert post success!";
+                        $scope.submitted = false;
+                        $scope.title = '';
+                    }
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });
@@ -236,20 +234,20 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
             post.$update(function(resp) {
                 //$location.path('posts/' + post._id);
                 var data = { id: resp._id }
-                PostSvc.getImageFromContent(data).then(result => {
-                    if (resp.error) {
-                        Notice.setNotice(resp.message, 'ERROR', true);
+                    // PostSvc.getImageFromContent(data).then(result => {
+                if (resp.error) {
+                    Notice.setNotice(resp.message, 'ERROR', true);
+                } else {
+                    Notice.setNotice("Update post success!", 'SUCCESS');
+                    if (gotoList) {
+                        $scope.gotoList();
                     } else {
-                        Notice.setNotice("Update page success!", 'SUCCESS');
-                        if (gotoList) {
-                            $scope.gotoList();
-                        } else {
-                            // $location.path('transactions/' + transaction._id);
-                            Notice.requireChange();
-                            $scope.submitted = false;
-                        }
+                        // $location.path('transactions/' + transaction._id);
+                        Notice.requireChange();
+                        $scope.submitted = false;
                     }
-                });
+                }
+                // });
             }, function(errorResponse) {
                 Notice.setNotice(errorResponse.data.message, 'ERROR', true);
             });

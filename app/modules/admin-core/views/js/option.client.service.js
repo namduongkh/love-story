@@ -4,17 +4,17 @@
  */
 angular.module('core').factory("Option", function($rootScope) {
 
-    var statuses = [{ name: "Publish", value: 1 }, { 'name': "Unpublish", value: 0 }];
+    var statuses = [{ name: "Công khai", value: 1 }, { 'name': "Không công khai", value: 0 }];
 
-    var tag_statuses = [{ name: "Publish", value: 1 }, { name: "Unpublish", value: 0 }];
+    var tag_statuses = [{ name: "Công khai", value: 1 }, { name: "Không công khai", value: 0 }];
 
-    var features = [{ name: "Yes", value: 1 }, { 'name': "No", value: 0 }];
+    var features = [{ name: "Có", value: 1 }, { 'name': "Không", value: 0 }];
 
-    var yesno = [{ name: "Yes", value: 1 }, { 'name': "No", value: 0 }];
+    var yesno = [{ name: "Có", value: 1 }, { 'name': "Không", value: 0 }];
 
     var roles = [{ name: "Admin", value: 'admin' }, { 'name': "User", value: 'user' }];
 
-    var genders = [{ name: 'male', value: 'male' }, { name: 'female', value: 'female' }];
+    var genders = [{ name: 'Nam', value: 'male' }, { name: 'Nữ', value: 'female' }];
 
     var types = [{ name: 'Product', value: 'product' }, { name: 'Post', value: 'post' }, { name: 'Banner', value: 'banner' }];
 
