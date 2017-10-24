@@ -317,3 +317,24 @@ function makeNewTagSlug(name, callback, count) {
         }
     });
 }
+
+exports.changeOrder = {
+    handler: function(request, reply) {
+        let { chapterId, type } = request.payload;
+        Chapter.findOne({ _id: chapterId })
+            .then(chapter => {
+                if (type === 'down') {
+                    chapter.order--;
+                    if (chapter.order < 1) {
+                        chapter.order = 1;
+                    }
+                } else {
+                    chapter.order++;
+                }
+                return chapter.save();
+            })
+            .then((chapter) => {
+                return reply({ status: true, data: chapter });
+            });
+    }
+};

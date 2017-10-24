@@ -50,9 +50,9 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
+                                    <th>Thứ tự</th>
                                     <th>Tiêu đề</th>
                                     <th>Status</th>
-                                    <th>Thứ tự</th>
                                     <th>Ngày tạo</th>
                                     <th>Hành động</th>
                                 </tr>
@@ -60,9 +60,13 @@
                             <tbody>
                                 <tr data-ng-repeat="chapter in items | filter: query">
                                     <td><a data-ui-sref="editChapter({chapterId: chapter._id, postId: queryPostId})">{{chapter._id}}</a></td>
+                                    <td>
+                                        <a href="javascript:void(0)" ng-click="changeOrder(chapter, 'down')"><span class="glyphicon glyphicon-arrow-down"></span></a>
+                                        <span>{{chapter.order}}</span>
+                                        <a href="javascript:void(0)" ng-click="changeOrder(chapter, 'up')"><span class="glyphicon glyphicon-arrow-up"></span></a>
+                                    </td>
                                     <td>{{chapter.title}}</td>
                                     <td><span class="label label-success" ng-if="chapter.status == 1">Công khai</span><span class="label label-danger" ng-if="chapter.status == 0">Không công khai</span></td>
-                                    <td>{{chapter.order}}</td>
                                     <td>{{chapter.created | date:'dd/MM/yyyy hh:mm'}}</td>
                                     <td>
                                         <!-- <a title="Link" href="{{webUrl}}/{{chapter.communityId.slug}}/chia-se-thao-luan/{{chapter.slug}}/{{chapter.shortId}}" target="_blank">

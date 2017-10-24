@@ -27,6 +27,11 @@ exports.register = function(server, options, next) {
         config: ChapterController.save,
     });
     server.route({
+        method: 'POST',
+        path: '/chapter/changeOrder',
+        config: ChapterController.changeOrder,
+    });
+    server.route({
         method: ['PUT', 'POST'],
         path: '/chapter/{id}',
         config: ChapterController.update,

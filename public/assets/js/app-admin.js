@@ -1143,6 +1143,21 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
                 $scope.slug = new_slug;
             }
         };
+
+        var refreshTimeout;
+        $scope.changeOrder = function(chapter, type) {
+            Chapters.changeOrder({
+                chapterId: chapter._id,
+                type: type
+            }, function(resp) {
+                chapter.order = resp.data.order;
+
+                clearTimeout(refreshTimeout);
+                refreshTimeout = setTimeout(function() {
+                    $scope.filter();
+                }, 3000);
+            });
+        };
     }
 ]);
 'use strict';
@@ -1158,7 +1173,15 @@ angular.module('chapters').factory('Chapters', ['$resource',
             },
             query: {
                 isArray: false
-            }
+            },
+            changeOrder: {
+                url: '/chapter/changeOrder',
+                method: 'POST',
+                payload: {
+                    chapterId: '@chapterId',
+                    type: '@type',
+                }
+            },
         });
     }
 ]);

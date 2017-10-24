@@ -11,7 +11,15 @@ angular.module('chapters').factory('Chapters', ['$resource',
             },
             query: {
                 isArray: false
-            }
+            },
+            changeOrder: {
+                url: '/chapter/changeOrder',
+                method: 'POST',
+                payload: {
+                    chapterId: '@chapterId',
+                    type: '@type',
+                }
+            },
         });
     }
 ]);
