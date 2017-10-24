@@ -10,10 +10,10 @@
                     <div class="box-footer">
                         <div class="form-group">
                             <!-- <a class="btn btn-primary" ng-click="create()">Create</a>
-                        &nbsp;&nbsp; -->
-                            <a class="btn btn-primary" ng-click="update(PostForm.$valid, 'GOTOLIST')">Lưu & thoát</a> &nbsp;&nbsp;
-                            <a class="btn btn-primary" ng-click="update(PostForm.$valid)">Lưu</a> &nbsp;&nbsp;
-                            <input type="button" value="Thoát" class="btn btn-default" ng-click="gotoList()"> &nbsp;&nbsp;
+                         -->
+                            <a class="btn btn-primary" ng-click="update(PostForm.$valid, 'GOTOLIST')">Lưu & thoát</a>
+                            <a class="btn btn-primary" ng-click="update(PostForm.$valid)">Lưu</a>
+                            <input type="button" value="Thoát" class="btn btn-default" ng-click="gotoList()">
                             <input type="button" value="Xóa" class="btn btn-danger" ng-click="remove(post._id)">
                         </div>
 
@@ -37,9 +37,18 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label class="control-label" for="title">Slug</label>
+                                <label class="control-label" for="slug">Slug</label>
                                 <div class="controls">
                                     <input type="text" data-ng-model="post.slug" id="slug" class="form-control" placeholder="Slug">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="control-label" for="totalChapters">Tổng số tập/chương</label>
+                                <div class="controls">
+                                    <input type="number" min="1" data-ng-model="post.totalChapters" id="totalChapters" class="form-control" placeholder="Tổng số tập/chương">
+                                </div>
+                                <div class="error-messages message" ng-messages="PostForm.totalChapters.$error" ng-messages-multiple ng-if="submitted">
+                                    <error-message/>
                                 </div>
                             </div>
                             <div class="form-group">

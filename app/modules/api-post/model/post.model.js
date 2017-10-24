@@ -58,6 +58,14 @@ var PostSchema = new Schema({
         description: String,
         keyword: String
     },
+    totalChapters: {
+        type: Number,
+        default: 0
+    },
+    publishChapters: {
+        type: Number,
+        default: 0
+    },
     total_recommened: { // Tổng số lượt khuyên nên đọc
         type: Number,
         default: 0

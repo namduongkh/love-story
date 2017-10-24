@@ -122,7 +122,8 @@ exports.save = {
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
             user: Joi.any().required().description('Poster'),
-            total_recommened: Joi.any().description('Total recommened')
+            total_recommened: Joi.any().description('Total recommened'),
+            totalChapters: Joi.any().description('Total chapters'),
         }
     }
 }
@@ -189,7 +190,8 @@ exports.update = {
             recomenedList: Joi.any().description('Recommened List'),
             userRecomened: Joi.any().description('User Recomened'),
             user: Joi.any().required().description('Poster'),
-            total_recommened: Joi.any().description('Total recommened')
+            total_recommened: Joi.any().description('Total recommened'),
+            totalChapters: Joi.any().description('Total chapters'),
         },
         options: {
             allowUnknown: true

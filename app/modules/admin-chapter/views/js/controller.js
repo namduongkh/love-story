@@ -101,6 +101,7 @@ angular.module('chapters').controller('ChaptersController', ['$scope', '$statePa
                 status: this.status,
                 meta: this.meta,
                 postId: this.postId,
+                order: this.order,
             });
 
             // Redirect after save

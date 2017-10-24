@@ -67,7 +67,7 @@
                                     <th>Status</th>
                                     <th>Người đăng</th>
                                     <th>Ngày tạo</th>
-                                    <th>Tập truyện</th>
+                                    <th>Tập - chương</th>
                                     <th>Hành động</th>
                                 </tr>
                             </thead>
@@ -75,15 +75,13 @@
                                 <tr data-ng-repeat="post in items | filter: query">
                                     <td><a data-ui-sref="editPost({postId: post._id})">{{post._id}}</a></td>
                                     <td>{{post.title}}</td>
-                                    <td>
-                                        {{post.category.name}}
-                                    </td>
+                                    <td>{{post.category.name}}</td>
                                     <td><span class="label label-success" ng-if="post.status == 1">Công khai</span><span class="label label-danger" ng-if="post.status == 0">Không công khai</span></td>
                                     <td>{{post.user.name}} <span class="label label-success" ng-if="post.user.is_seed == 1">Seed</span></td>
-                                    <td>{{post.created | date:'hh:mm dd/MM/yyyy'}}</td>
+                                    <td>{{post.created | date:'dd/MM/yyyy hh:mm'}}</td>
                                     <td>
                                         <a data-ui-sref="listChapters({postId: post._id})" title="Xem tập truyện">
-                                            Xem danh sách
+                                            {{post.publishChapters}}/{{post.totalChapters}} tập - chương
                                         </a>
                                     </td>
                                     <td>

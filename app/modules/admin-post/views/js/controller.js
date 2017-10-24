@@ -158,7 +158,8 @@ angular.module('posts').controller('PostsController', ['$scope', '$stateParams',
                 meta: this.meta,
                 communityId: this.community,
                 tags: this.tag,
-                user: this.user
+                user: this.user,
+                totalChapters: this.totalChapters,
             });
 
             // Redirect after save

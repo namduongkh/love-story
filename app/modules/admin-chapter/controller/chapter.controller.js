@@ -39,7 +39,10 @@ exports.getAll = {
 
         Chapter.find(options)
             .populate('category')
-            .populate('user', 'name is_seed').lean().sort('-created').paginate(page, itemsPerPage, function(err, items, total) {
+            .populate('user', 'name is_seed')
+            .lean()
+            .sort('-order -created')
+            .paginate(page, itemsPerPage, function(err, items, total) {
                 if (err) {
                     request.log(['error', 'list', 'chapter'], err);
                     console.log("err", err);

@@ -6,6 +6,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 var slug = require('slug');
+var async = require('async');
 /**
  * Chapter Schema
  */
@@ -37,6 +38,9 @@ var ChapterSchema = new Schema({
     status: {
         type: Number,
         default: 1
+    },
+    order: {
+        type: Number,
     },
     created: {
         type: Date,
@@ -107,6 +111,49 @@ ChapterSchema.pre('save', function(next) {
     } else {
         next();
     }
+});
+
+ChapterSchema.pre('save', function(next) {
+    var Chapter = mongoose.model("Chapter");
+    var that = this;
+    if (!this.order) {
+        Chapter.find({
+                postId: this.postId,
+            })
+            .lean()
+            .sort("-order")
+            .limit(1)
+            .then(chapter => {
+                that.order = (chapter && chapter.length ? chapter[0].order : 0) + 1;
+                next();
+            });
+    } else {
+        next();
+    }
+});
+
+ChapterSchema.post('save', function(doc) {
+    var Post = mongoose.model("Post");
+    var Chapter = mongoose.model("Chapter");
+    async.parallel({
+        publishChapters: function(c) {
+            Chapter.find({ postId: doc.postId, status: 1 })
+                .lean()
+                .count()
+                .then(count => {
+                    c(null, count);
+                });
+        },
+        post: function(c) {
+            Post.findOne({ _id: doc.postId })
+                .then(post => {
+                    c(null, post);
+                });
+        }
+    }, function(err, result) {
+        result.post.publishChapters = result.publishChapters;
+        result.post.save();
+    });
 });
 
 module.exports = mongoose.model('Chapter', ChapterSchema);
